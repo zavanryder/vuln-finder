@@ -1,11 +1,11 @@
 ---
 name: vuln-discovery
-description: Discovers code vulnerabilities by bug class (e.g. deserialization, SQL injection, prototype pollution) in snippets or codebases. Use when the user asks to find vulnerabilities, security issues, or to audit code for specific bug types in Java, Python, Go, C#, PHP, JavaScript, or TypeScript.
+description: Discovers code vulnerabilities by bug class (e.g. deserialization, SQL injection, prototype pollution) in snippets or codebases. Use when the user asks to find vulnerabilities, security issues, or to audit code for specific bug types in Java, Python, Go, C#, PHP, Ruby, JavaScript, or TypeScript.
 ---
 
 # Vulnerability Discovery
 
-Finds security issues in code based on user-specified bug classes and supported languages (Java, Python, Go, C#, PHP, JavaScript, TypeScript).
+Finds security issues in code based on user-specified bug classes and supported languages (Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript).
 
 ## Inputs
 
@@ -21,7 +21,7 @@ Finds security issues in code based on user-specified bug classes and supported 
    If the user said "ALL", use the full list from [references/bug-classes.md](references/bug-classes.md). Otherwise map the user’s terms to the canonical IDs in that file (e.g. "sql injection" → `sql-injection`).
 
 2. **Identify languages**  
-   Infer from file extensions or user hint. Supported: Java, Python, Go, C#, PHP, JavaScript, TypeScript.
+   Infer from file extensions or user hint. Supported: Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript.
 
 3. **Load patterns**  
    For each relevant language and chosen bug class, read [references/patterns-by-language.md](references/patterns-by-language.md) and use the sections for that language and the bug classes you’re checking.

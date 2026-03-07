@@ -11,8 +11,9 @@ Sinks, dangerous APIs, and pattern hints per language for each bug class. Search
 3. [Go](#go)
 4. [C# (.NET)](#c-net)
 5. [PHP](#php)
-6. [JavaScript](#javascript)
-7. [TypeScript](#typescript)
+6. [Ruby](#ruby)
+7. [JavaScript](#javascript)
+8. [TypeScript](#typescript)
 
 ---
 
@@ -103,6 +104,27 @@ Sinks, dangerous APIs, and pattern hints per language for each bug class. Search
 - **weak-crypto**: `rand()`/`mt_rand()` for tokens; `md5`/`sha1` for passwords.
 - **mass-assignment**: Eloquent/Model `fill($request->all())` without `$fillable` or allowlist.
 - **auth-bypass**: Missing auth middleware; comparing session/input without proper verification.
+
+---
+
+## Ruby
+
+- **deserialization**: `YAML.load` (unsafe), `YAML.unsafe_load`, `Marshal.load`, `Marshal.restore`; `Oj.load` with mode allowing object creation; `Psych.load` on untrusted input.
+- **sql-injection**: String interpolation in `execute`, `query`, `find_by_sql`; `where` with raw SQL string and user input; ActiveRecord `order`/`reorder`/`select` with params; concatenation into raw SQL.
+- **nosql-injection**: MongoDB driver (MongoID, Moped) with user-supplied query hash or `$where` string; building criteria from params without sanitization.
+- **command-injection**: `system(user_input)`, `exec`, backticks, `Kernel.exec`, `Open3.capture2`/`popen3` with user in command string; `IO.popen` with user input.
+- **path-traversal**: `File.read(params[:path])`, `File.open`, `File.new`, `Pathname.new` with user path; `send_file`/`send_data` with user-controlled filename or path; `Rails.root.join` with user segment.
+- **ssrf**: `open(user_url)` (Kernel#open), `URI.open`, `Net::HTTP.get(URI(user_url))`, `RestClient.get(user_url)`, `Faraday.get`, `HTTParty.get` with user URL; `Curly.get`/HTTP gem with user-controlled URI.
+- **xss**: `raw`, `html_safe`, `<%= user_input %>` without escaping in ERB; `content_tag`/`tag` with user content; `render inline:` with user string; disabling `html_escape` or using `safe_join` with unescaped data.
+- **xxe**: `Nokogiri::XML` with default options; `REXML::Document` parsing untrusted XML without disabling external entities; `LibXML::XML::Document` with unsafe options.
+- **ldap-injection**: Net::LDAP filter built from user string; concatenated filter or DN.
+- **ssti**: `ERB.new(user_input).result`, `eval` in template context; user-controlled template string in Slim/Haml/Liquid; `render inline: params[:template]`.
+- **open-redirect**: `redirect_to params[:url]`, `redirect_to request.referer` without allowlist; `redirect_to` with user-controlled host/path.
+- **hardcoded-secrets**: Secrets in `config/`, `credentials`, env files in repo; literal API keys or passwords in source; `Rails.application.secrets` with defaults in code.
+- **weak-crypto**: `Random.rand` for tokens; `Digest::MD5`/`SHA1` for passwords; weak or default cipher options.
+- **mass-assignment**: `Model.new(params)` or `update(params)` without `permit`; `assign_attributes(params)`; strong params missing or overly permissive.
+- **insecure-file-upload**: Uploaded file saved with original filename or user path; no type/size validation; stored in web-accessible directory.
+- **auth-bypass**: `skip_before_action :authenticate_user!`; missing `before_action` for auth; trusting `params[:user_id]` or session without verification; `current_user` checks missing or bypassable.
 
 ---
 

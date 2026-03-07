@@ -17,7 +17,7 @@ Ask the agent to find vulnerabilities and specify:
    - A **code snippet** (paste or point to a file), or  
    - A **codebase path** (e.g. `./src`, `backend/`) to scan.
 
-**Supported languages:** Java, Python, Go, C#, PHP, JavaScript, TypeScript.
+**Supported languages:** Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript.
 
 ### Example prompts
 

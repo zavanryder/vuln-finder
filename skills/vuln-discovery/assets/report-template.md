@@ -2,7 +2,7 @@
 
 **Target:** [snippet | path to codebase]  
 **Bug classes:** [comma-separated IDs]  
-**Languages:** [e.g. Python, JavaScript]  
+**Languages:** [e.g. Python, Ruby, JavaScript]  
 **Date:** [optional]
 
 ---
