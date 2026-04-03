@@ -1,0 +1,17 @@
+# Vulnerable: GitHub Actions expression injection in run step.
+name: PR Greeting
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Greet PR author
+        run: |
+          echo "Thanks for the PR: ${{ github.event.pull_request.title }}"
+          echo "Author: ${{ github.event.pull_request.user.login }}"
+
+      - name: Log commit message
+        run: echo "Latest commit: ${{ github.event.head_commit.message }}"

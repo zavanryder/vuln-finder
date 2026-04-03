@@ -1,0 +1,22 @@
+# Vulnerable: Overly broad permissions, pull_request_target with head checkout, unpinned actions.
+name: CI
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+
+permissions: write-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Install and test
+        run: |
+          npm install
+          npm test
+
+      - uses: some-org/deploy-action@v2

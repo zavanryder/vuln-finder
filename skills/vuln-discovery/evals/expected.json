@@ -1,0 +1,375 @@
+{
+  "skill_name": "vuln-discovery",
+  "version": "2.0",
+  "fixtures": [
+    {
+      "file": "fixtures/python/sqli_vulnerable.py",
+      "language": "Python",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "sql-injection", "min_severity": "High", "cwe": "CWE-89" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/python/sqli_safe.py",
+      "language": "Python",
+      "is_vulnerable": false,
+      "expected_findings": [],
+      "acceptable_misses": [],
+      "false_positive_trap": true
+    },
+    {
+      "file": "fixtures/python/cmdi_vulnerable.py",
+      "language": "Python",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "command-injection", "min_severity": "High", "cwe": "CWE-78" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/python/cmdi_safe.py",
+      "language": "Python",
+      "is_vulnerable": false,
+      "expected_findings": [],
+      "acceptable_misses": [],
+      "false_positive_trap": true
+    },
+    {
+      "file": "fixtures/python/deser_vulnerable.py",
+      "language": "Python",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "deserialization", "min_severity": "Critical", "cwe": "CWE-502" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/python/deser_safe.py",
+      "language": "Python",
+      "is_vulnerable": false,
+      "expected_findings": [],
+      "acceptable_misses": [],
+      "false_positive_trap": true
+    },
+    {
+      "file": "fixtures/python/ssti_vulnerable.py",
+      "language": "Python",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "ssti", "min_severity": "Critical", "cwe": "CWE-1336" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/python/path_traversal_vulnerable.py",
+      "language": "Python",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "path-traversal", "min_severity": "High", "cwe": "CWE-22" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/python/path_traversal_safe.py",
+      "language": "Python",
+      "is_vulnerable": false,
+      "expected_findings": [],
+      "acceptable_misses": [],
+      "false_positive_trap": true
+    },
+    {
+      "file": "fixtures/python/ssrf_vulnerable.py",
+      "language": "Python",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "ssrf", "min_severity": "High", "cwe": "CWE-918" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/python/secrets_vulnerable.py",
+      "language": "Python",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "hardcoded-secrets", "min_severity": "High", "cwe": "CWE-798" },
+        { "bug_class": "weak-crypto", "min_severity": "Medium", "cwe": "CWE-327" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/javascript/prototype_pollution_vulnerable.js",
+      "language": "JavaScript",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "prototype-pollution", "min_severity": "High", "cwe": "CWE-1321" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/javascript/prototype_pollution_safe.js",
+      "language": "JavaScript",
+      "is_vulnerable": false,
+      "expected_findings": [],
+      "acceptable_misses": [],
+      "false_positive_trap": true
+    },
+    {
+      "file": "fixtures/javascript/xss_vulnerable.js",
+      "language": "JavaScript",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "xss", "min_severity": "Medium", "cwe": "CWE-79" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/javascript/xss_safe.js",
+      "language": "JavaScript",
+      "is_vulnerable": false,
+      "expected_findings": [],
+      "acceptable_misses": [],
+      "false_positive_trap": true
+    },
+    {
+      "file": "fixtures/javascript/nosql_vulnerable.js",
+      "language": "JavaScript",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "nosql-injection", "min_severity": "High", "cwe": "CWE-943" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/javascript/cmdi_vulnerable.js",
+      "language": "JavaScript",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "command-injection", "min_severity": "High", "cwe": "CWE-78" }
+      ],
+      "acceptable_misses": [
+        { "bug_class": "xss", "note": "stdout echoed in HTML without escaping, but secondary to the cmdi" }
+      ],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/javascript/jwt_vulnerable.js",
+      "language": "JavaScript",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "jwt-session-issues", "min_severity": "High", "cwe": "CWE-345" },
+        { "bug_class": "hardcoded-secrets", "min_severity": "Medium", "cwe": "CWE-798" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/java/SqliVulnerable.java",
+      "language": "Java",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "sql-injection", "min_severity": "High", "cwe": "CWE-89" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/java/SqliSafe.java",
+      "language": "Java",
+      "is_vulnerable": false,
+      "expected_findings": [],
+      "acceptable_misses": [],
+      "false_positive_trap": true
+    },
+    {
+      "file": "fixtures/java/DeserVulnerable.java",
+      "language": "Java",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "deserialization", "min_severity": "Critical", "cwe": "CWE-502" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/java/XxeVulnerable.java",
+      "language": "Java",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "xxe", "min_severity": "High", "cwe": "CWE-611" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/go/sqli_vulnerable.go",
+      "language": "Go",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "sql-injection", "min_severity": "High", "cwe": "CWE-89" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/go/sqli_safe.go",
+      "language": "Go",
+      "is_vulnerable": false,
+      "expected_findings": [],
+      "acceptable_misses": [],
+      "false_positive_trap": true
+    },
+    {
+      "file": "fixtures/go/path_traversal_vulnerable.go",
+      "language": "Go",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "path-traversal", "min_severity": "High", "cwe": "CWE-22" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/go/ssrf_vulnerable.go",
+      "language": "Go",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "ssrf", "min_severity": "High", "cwe": "CWE-918" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/c/buffer_overflow_vulnerable.c",
+      "language": "C",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "buffer-overflow", "min_severity": "High", "cwe": "CWE-120" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/c/buffer_overflow_safe.c",
+      "language": "C",
+      "is_vulnerable": false,
+      "expected_findings": [],
+      "acceptable_misses": [],
+      "false_positive_trap": true
+    },
+    {
+      "file": "fixtures/c/use_after_free_vulnerable.c",
+      "language": "C",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "use-after-free", "min_severity": "High", "cwe": "CWE-416" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/c/format_string_vulnerable.c",
+      "language": "C",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "format-string", "min_severity": "High", "cwe": "CWE-134" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/c/integer_overflow_vulnerable.c",
+      "language": "C",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "integer-overflow", "min_severity": "High", "cwe": "CWE-190" }
+      ],
+      "acceptable_misses": [
+        { "bug_class": "buffer-overflow", "note": "integer overflow leads to heap overflow, both are valid findings" }
+      ],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/github-actions/injection_vulnerable.yml",
+      "language": "GitHub Actions",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "code-injection", "min_severity": "High", "cwe": "CWE-94" }
+      ],
+      "acceptable_misses": [],
+      "false_positive_trap": false
+    },
+    {
+      "file": "fixtures/github-actions/injection_safe.yml",
+      "language": "GitHub Actions",
+      "is_vulnerable": false,
+      "expected_findings": [],
+      "acceptable_misses": [],
+      "false_positive_trap": true
+    },
+    {
+      "file": "fixtures/github-actions/permissions_vulnerable.yml",
+      "language": "GitHub Actions",
+      "is_vulnerable": true,
+      "expected_findings": [
+        { "bug_class": "security-misconfiguration", "min_severity": "High", "cwe": "CWE-16" },
+        { "bug_class": "software-data-integrity", "min_severity": "High", "cwe": "CWE-494" }
+      ],
+      "acceptable_misses": [
+        { "bug_class": "vulnerable-components", "note": "unpinned actions are a valid finding but harder to detect statically" }
+      ],
+      "false_positive_trap": false
+    }
+  ],
+  "chains": [
+    {
+      "directory": "chains/ssrf-to-rce",
+      "language": "Python",
+      "expected_findings": [
+        { "bug_class": "ssrf", "min_severity": "High", "cwe": "CWE-918" },
+        { "bug_class": "deserialization", "min_severity": "Critical", "cwe": "CWE-502" },
+        { "bug_class": "missing-authentication", "min_severity": "High", "cwe": "CWE-306" }
+      ],
+      "expected_chain": {
+        "name": "SSRF -> deserialization -> RCE",
+        "result": "Remote code execution",
+        "min_severity": "Critical",
+        "steps": [
+          "SSRF via /fetch reaches internal /admin/import",
+          "/admin/import deserializes untrusted pickle",
+          "Crafted pickle payload achieves RCE"
+        ]
+      }
+    },
+    {
+      "directory": "chains/idor-path-traversal-secrets",
+      "language": "JavaScript",
+      "expected_findings": [
+        { "bug_class": "object-level-authz", "min_severity": "High", "cwe": "CWE-639" },
+        { "bug_class": "path-traversal", "min_severity": "High", "cwe": "CWE-22" },
+        { "bug_class": "hardcoded-secrets", "min_severity": "Medium", "cwe": "CWE-798" }
+      ],
+      "expected_chain": {
+        "name": "Path traversal -> secret exfiltration -> JWT forgery -> IDOR",
+        "result": "Access any user's PII",
+        "min_severity": "High",
+        "steps": [
+          "Path traversal via /files reads .env to obtain JWT_SECRET",
+          "Attacker forges JWT with arbitrary sub claim",
+          "Forged JWT used on /api/users/:id to access any user's data (IDOR)"
+        ]
+      }
+    }
+  ]
+}
