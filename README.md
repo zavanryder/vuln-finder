@@ -1,38 +1,96 @@
 # ZavanVulnFinder
 
-Agent skill for discovering code vulnerabilities by bug class in snippets or codebases.
+A Claude Code agent skill for discovering security vulnerabilities by bug class across codebases and code snippets.
 
-## Location
+## What it does
 
-The skill lives at **`skills/vuln-discovery/`**.
+ZavanVulnFinder performs structured vulnerability discovery: it resolves bug classes, loads domain-specific pattern references, runs a first-pass grep scan, then does contextual source-to-sink analysis. Findings are reported with CWE IDs, confidence levels, severity justification, and exploit chain analysis. For Critical/High findings, it generates proof-of-concept payloads.
+
+## Coverage
+
+**46 bug classes** organized by domain:
+
+| Domain | Bug classes |
+|--------|-------------|
+| **Injection** | SQL injection, NoSQL injection, command injection, code injection, deserialization, SSTI, LDAP injection, XXE |
+| **Access control** | Missing authentication, missing authorization, incorrect authorization, BOLA/IDOR, BOPLA/mass assignment, BFLA, CSRF |
+| **Client-side** | XSS, open redirect, SSRF, path traversal (incl. Zip Slip), CORS misconfiguration |
+| **Data & secrets** | Hardcoded secrets, sensitive data exposure, JWT/session issues, weak crypto |
+| **Infrastructure** | Security misconfiguration, insecure file upload, resource exhaustion (incl. ReDoS), vulnerable components, software/data integrity, GraphQL overexposure |
+| **Kubernetes & cloud** | RBAC misconfiguration, pod security, network exposure, unsafe volume mounts, container misconfiguration |
+| **IaC** | Terraform/HCL misconfiguration (public buckets, overpermissive IAM, unencrypted storage, open security groups) |
+| **AI/ML** | ML model integrity (pickle/torch.load/joblib), prompt injection (direct + RAG stored injection) |
+| **JS/TS** | Prototype pollution |
+| **Memory safety** | Buffer overflow, OOB read/write, use-after-free, integer overflow, format string, Rust unsafe code |
+
+**16 languages and file types:**
+
+Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, GitHub Actions (YAML), Shell, Dockerfile, Helm charts, Terraform/HCL.
 
 ## Usage
 
 Ask the agent to find vulnerabilities and specify:
 
-1. **Bug class(es)** — One or more types, or **ALL** for every supported type.  
-   Examples: *deserialization*, *sql injection*, *prototype pollution*, *xss*, *ssrf*, *path traversal*, *hardcoded secrets*, etc.
-
-2. **Target** — Either:
-   - A **code snippet** (paste or point to a file), or  
-   - A **codebase path** (e.g. `./src`, `backend/`) to scan.
-
-**Supported languages:** Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript.
+1. **Bug class(es)** -- one or more types, or **ALL** for every applicable type.
+2. **Target** -- a code snippet (paste or point to a file) or a codebase path to scan.
 
 ### Example prompts
 
-- “Find SQL injection and deserialization issues in `./api` (Python).”
-- “Check this snippet for prototype pollution and XSS.” [paste code]
-- “Run a full vulnerability check for ALL bug types on the `server/` directory.”
+```
+Scan ./backend for ALL vulnerability classes
+```
+```
+Check our Kubernetes manifests and Helm charts in k8s/ for RBAC and pod security issues
+```
+```
+Find prompt injection and model integrity issues in the RAG pipeline under src/ai/
+```
+```
+Look for SQL injection, deserialization, and hardcoded secrets in the Java API at src/main/java/
+```
+```
+Audit the Dockerfiles and Terraform modules in infra/ for security misconfigurations
+```
+```
+Check this Rust crate's unsafe blocks for memory safety issues
+```
+
+## How it works
+
+1. **Resolve** user's bug-class terms to canonical IDs via `references/bug-classes.md`
+2. **Identify** target languages from file extensions
+3. **Load** domain-specific pattern references (only the relevant ones)
+4. **Search** with `scripts/grep-patterns.sh` for a first-pass candidate scan
+5. **Analyze** each candidate in context -- trace source to sink, check for sanitizers/guards
+6. **Chain** -- evaluate whether multiple findings combine into exploit chains
+7. **Report** with CWE, confidence, severity, source/sink trace, and remediation
+8. **PoC** -- for Critical/High findings, suggest proof-of-concept payloads
 
 ## Skill layout
 
-| Path | Purpose |
-|------|--------|
-| `SKILL.md` | Workflow, inputs, and pointers to references/assets/scripts |
-| `references/bug-classes.md` | Canonical bug-class IDs and “ALL” list |
-| `references/patterns-by-language.md` | Sinks and dangerous APIs per language and bug class |
-| `assets/report-template.md` | Output report structure |
-| `scripts/grep-patterns.sh` | Optional first-pass grep for candidate lines |
+```
+skills/vuln-discovery/
+  SKILL.md                              # Workflow, inputs, rules
+  references/
+    bug-classes.md                      # 46 canonical IDs, CWE mappings, aliases
+    patterns-web.md                     # Injection, XSS, SSRF, deserialization per language
+    patterns-access-control.md          # Auth, authz, CSRF, CORS, JWT per language/framework
+    patterns-memory-safety.md           # C/C++ memory bugs + Rust unsafe patterns
+    patterns-ci-cd.md                   # GitHub Actions injection, supply chain
+    patterns-resource-exhaustion.md     # ReDoS, unbounded queries, upload size
+    patterns-kubernetes.md              # RBAC, pod security, network exposure, volume mounts
+    patterns-container.md               # Dockerfile, Helm, Terraform/HCL patterns
+    patterns-ai-ml.md                   # Model integrity, prompt injection, RAG security
+    exploit-chains.md                   # Common chain patterns
+    poc-web.md                          # PoC guidance: HTTP/API targets
+    poc-local-file.md                   # PoC guidance: file/archive/local exploitation
+    poc-ci-cd.md                        # PoC guidance: CI/CD workflows
+    poc-memory.md                       # PoC guidance: memory corruption
+  assets/
+    report-template.md                  # Report structure template
+    poc-script-template.py              # Python PoC starter script
+  scripts/
+    grep-patterns.sh                    # First-pass candidate search (rg/grep)
+```
 
-The skill keeps `SKILL.md` short and pushes detail into references, assets, and scripts so the agent can load only what it needs.
+The skill keeps `SKILL.md` concise and pushes detail into domain-specific references so the agent loads only what it needs per scan.
