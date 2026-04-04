@@ -38,7 +38,30 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 | `cors-misconfiguration` | CORS misconfiguration | CWE-942 | Overly permissive `Access-Control-Allow-Origin`, reflecting arbitrary origins, allowing credentials with wildcards. |
 | `graphql-overexposure` | GraphQL overexposure | CWE-200 | Missing query depth/complexity limits, introspection enabled in production, authorization missing on resolvers. |
 
-### Memory-safety classes (C/C++)
+### Kubernetes and cloud-native classes
+
+| ID | Name | CWE | Brief description |
+|----|------|-----|-------------------|
+| `k8s-rbac-misconfig` | Kubernetes RBAC misconfiguration | CWE-269 | Overpermissive ClusterRoles/Roles: wildcard verbs/resources, secrets access at cluster scope, escalation-capable verbs (bind, escalate, impersonate). |
+| `k8s-pod-security` | Kubernetes pod security | CWE-250 | Missing or insufficient pod securityContext: running as root, privileged containers, missing capability drops, host namespace access, writable root filesystem. |
+| `k8s-network-exposure` | Kubernetes network exposure | CWE-284 | Unauthenticated service endpoints (management, metrics, health), LoadBalancer/NodePort on internal services, missing NetworkPolicy, servers bound to 0.0.0.0. |
+| `unsafe-volume-mount` | Unsafe volume mount | CWE-269 | Host filesystem paths mounted into containers: docker.sock, /etc, /proc, host root. Writable mounts to sensitive host paths. |
+| `container-misconfig` | Container misconfiguration | CWE-250 | Dockerfile: running as root, unpinned base images (:latest), ADD from URLs, secrets in build layers, exposed debug ports. Helm: permissive defaults, tpl injection. |
+
+### IaC classes
+
+| ID | Name | CWE | Brief description |
+|----|------|-----|-------------------|
+| `iac-misconfig` | Infrastructure-as-code misconfiguration | CWE-1188 | Terraform/HCL: public storage buckets, overpermissive IAM (Action: *), unencrypted storage/transport, security groups with 0.0.0.0/0, disabled logging. |
+
+### AI/ML classes
+
+| ID | Name | CWE | Brief description |
+|----|------|-----|-------------------|
+| `ml-model-integrity` | ML model integrity | CWE-494 | Loading serialized ML models via pickle-based formats (torch.load, joblib.load, pickle.load) from untrusted sources without integrity verification. Includes eval artifacts. |
+| `prompt-injection` | Prompt injection | CWE-74 | User input concatenated into LLM prompts or RAG context without sanitization; enables overriding system instructions, data exfiltration, or stored injection via vector stores. |
+
+### Memory-safety classes (C/C++/Rust)
 
 | ID | Name | CWE | Brief description |
 |----|------|-----|-------------------|
@@ -48,6 +71,7 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 | `use-after-free` | Use-after-free | CWE-416 | Accessing memory after it has been freed; can lead to code execution. |
 | `integer-overflow` | Integer overflow / wraparound | CWE-190 | Arithmetic overflow leads to unexpected values used in allocation sizes, loop bounds, or security checks. |
 | `format-string` | Format string vulnerability | CWE-134 | User input used as format string in printf-family functions; can read/write arbitrary memory. |
+| `rust-unsafe` | Rust unsafe code | CWE-787 | Unsafe blocks: raw pointer dereference, transmute, FFI boundary issues, ManuallyDrop misuse, unchecked indexing, incorrect Send/Sync impls. |
 
 ## User term -> ID mapping
 
@@ -82,16 +106,25 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 - "integrity", "artifact poisoning", "unsafe trigger" -> `software-data-integrity`
 - "cors" -> `cors-misconfiguration`
 - "graphql" -> `graphql-overexposure`
+- "k8s rbac", "rbac misconfiguration", "clusterrole", "overpermissive rbac" -> `k8s-rbac-misconfig`
+- "pod security", "securitycontext", "privileged container", "host namespace" -> `k8s-pod-security`
+- "network exposure", "unauthenticated endpoint", "missing networkpolicy", "loadbalancer exposure" -> `k8s-network-exposure`
+- "volume mount", "hostpath", "docker socket", "docker.sock" -> `unsafe-volume-mount`
+- "container security", "dockerfile", "helm misconfig", "image pinning" -> `container-misconfig`
+- "iac", "terraform", "hcl", "infrastructure as code", "public bucket", "security group" -> `iac-misconfig`
+- "model integrity", "torch.load", "joblib", "ml model", "model poisoning", "safetensors" -> `ml-model-integrity`
+- "prompt injection", "rag injection", "llm injection", "context injection" -> `prompt-injection`
 - "buffer overflow", "bof", "stack overflow", "heap overflow" -> `buffer-overflow`
 - "oob write", "out of bounds write" -> `out-of-bounds-write`
 - "oob read", "out of bounds read", "information leak" -> `out-of-bounds-read`
 - "use after free", "uaf", "dangling pointer" -> `use-after-free`
 - "integer overflow", "integer wraparound", "int overflow" -> `integer-overflow`
 - "format string", "printf" -> `format-string`
+- "rust unsafe", "unsafe block", "transmute", "raw pointer", "ffi safety" -> `rust-unsafe`
 
 ## ALL list (ordered by current priority)
 
-When user specifies "ALL", check for these IDs in order. Memory-safety classes are only checked when C/C++ files are present.
+When user specifies "ALL", check for these IDs in order. Domain-specific classes are only checked when relevant files are present (see conditional notes per section).
 
 ### Core injection and execution
 1. `sql-injection`
@@ -136,10 +169,25 @@ When user specifies "ALL", check for these IDs in order. Memory-safety classes a
 ### Prototype pollution (JS/TS only)
 31. `prototype-pollution`
 
-### Memory safety (C/C++ only)
-32. `buffer-overflow`
-33. `out-of-bounds-write`
-34. `out-of-bounds-read`
-35. `use-after-free`
-36. `integer-overflow`
-37. `format-string`
+### Kubernetes and cloud-native (checked when K8s manifests, Helm charts, or operator code is present)
+32. `k8s-rbac-misconfig`
+33. `k8s-pod-security`
+34. `k8s-network-exposure`
+35. `unsafe-volume-mount`
+36. `container-misconfig`
+
+### IaC (checked when Terraform/HCL or Dockerfile files are present)
+37. `iac-misconfig`
+
+### AI/ML (checked when ML framework imports or LLM API calls are present)
+38. `ml-model-integrity`
+39. `prompt-injection`
+
+### Memory safety (C/C++/Rust only)
+40. `buffer-overflow`
+41. `out-of-bounds-write`
+42. `out-of-bounds-read`
+43. `use-after-free`
+44. `integer-overflow`
+45. `format-string`
+46. `rust-unsafe`

@@ -1,6 +1,6 @@
 ---
 name: vuln-discovery
-description: Discovers code vulnerabilities by bug class (e.g. SQL injection, CSRF, prototype pollution, buffer overflow, broken access control, resource exhaustion) in snippets or codebases. Use when the user asks to find vulnerabilities, security issues, audit code, check for specific bug types, review access control, or scan for secrets/misconfigurations. Supports Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, GitHub Actions workflows, and Shell scripts. Also use when the user mentions OWASP, CWE, CVE scanning, or secure code review.
+description: Discovers code vulnerabilities by bug class (e.g. SQL injection, CSRF, prototype pollution, buffer overflow, broken access control, resource exhaustion, Kubernetes RBAC, container security, Terraform misconfig, prompt injection, ML model integrity) in snippets or codebases. Use when the user asks to find vulnerabilities, security issues, audit code, check for specific bug types, review access control, or scan for secrets/misconfigurations. Supports Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, GitHub Actions workflows, Shell scripts, Dockerfiles, Helm charts, and Terraform/HCL. Also use when the user mentions OWASP, CWE, CVE scanning, secure code review, Kubernetes security, cloud-native security, container security, IaC security, or AI/ML pipeline security.
 ---
 
 # Vulnerability Discovery
@@ -9,7 +9,7 @@ Finds security issues in code based on user-specified bug classes across support
 
 ## Supported languages
 
-Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, GitHub Actions (YAML workflows), Shell.
+Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, GitHub Actions (YAML workflows), Shell, Dockerfile, Helm charts, Terraform/HCL.
 
 ## Inputs
 
@@ -31,9 +31,12 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, GitHub A
    For each relevant language and chosen bug class, read the appropriate pattern reference:
    - Web and injection patterns: [references/patterns-web.md](references/patterns-web.md)
    - Access control patterns: [references/patterns-access-control.md](references/patterns-access-control.md)
-   - Memory safety (C/C++): [references/patterns-memory-safety.md](references/patterns-memory-safety.md)
+   - Memory safety (C/C++/Rust): [references/patterns-memory-safety.md](references/patterns-memory-safety.md)
    - CI/CD and workflows: [references/patterns-ci-cd.md](references/patterns-ci-cd.md)
    - Resource exhaustion: [references/patterns-resource-exhaustion.md](references/patterns-resource-exhaustion.md)
+   - Kubernetes and cloud-native: [references/patterns-kubernetes.md](references/patterns-kubernetes.md)
+   - Container and IaC (Dockerfile, Helm, Terraform): [references/patterns-container.md](references/patterns-container.md)
+   - AI/ML pipeline security: [references/patterns-ai-ml.md](references/patterns-ai-ml.md)
 
 4. **Search and analyze**
    - For a **snippet**: analyze the provided code against the patterns for the chosen bug classes and languages.
@@ -73,9 +76,12 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, GitHub A
 | [references/bug-classes.md](references/bug-classes.md) | Resolve "ALL" or user bug-class names; get canonical list, CWE mappings, and aliases. |
 | [references/patterns-web.md](references/patterns-web.md) | Sinks and dangerous APIs for injection, XSS, SSRF, deserialization, secrets, crypto, file upload, and general web bugs per language. |
 | [references/patterns-access-control.md](references/patterns-access-control.md) | Patterns for authentication, authorization, CSRF, CORS, JWT, and session issues per language and framework. |
-| [references/patterns-memory-safety.md](references/patterns-memory-safety.md) | Buffer overflow, OOB read/write, use-after-free, integer overflow, and format string patterns for C/C++. |
+| [references/patterns-memory-safety.md](references/patterns-memory-safety.md) | Buffer overflow, OOB read/write, use-after-free, integer overflow, format string patterns for C/C++, and Rust unsafe patterns. |
 | [references/patterns-ci-cd.md](references/patterns-ci-cd.md) | GitHub Actions injection, permission abuse, artifact poisoning, unsafe triggers, shell script issues. |
 | [references/patterns-resource-exhaustion.md](references/patterns-resource-exhaustion.md) | ReDoS, unbounded pagination, upload size, GraphQL depth, and other resource exhaustion patterns. |
+| [references/patterns-kubernetes.md](references/patterns-kubernetes.md) | Kubernetes RBAC misconfiguration, pod security, network exposure, unsafe volume mounts, cross-namespace access, cloud metadata SSRF. |
+| [references/patterns-container.md](references/patterns-container.md) | Dockerfile security, Helm chart misconfiguration, image pinning, Terraform/HCL insecure defaults. |
+| [references/patterns-ai-ml.md](references/patterns-ai-ml.md) | ML model integrity (torch.load, pickle, joblib), prompt injection, RAG pipeline security. |
 | [references/exploit-chains.md](references/exploit-chains.md) | Common chain patterns and how to outline a potential exploit. |
 | [references/poc-web.md](references/poc-web.md) | PoC guidance for HTTP/API endpoint vulnerabilities. |
 | [references/poc-local-file.md](references/poc-local-file.md) | PoC guidance for file parsing, archive extraction, and local exploitation. |
@@ -99,6 +105,12 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, GitHub A
 
 **JS/TS specific:** Prototype pollution.
 
-**Memory safety (C/C++):** Buffer overflow, out-of-bounds write, out-of-bounds read, use-after-free, integer overflow, format string.
+**Kubernetes and cloud-native:** RBAC misconfiguration, pod security, network exposure, unsafe volume mounts, container misconfiguration.
+
+**IaC:** Terraform/HCL misconfiguration (public buckets, overpermissive IAM, unencrypted storage, open security groups).
+
+**AI/ML:** ML model integrity, prompt injection.
+
+**Memory safety (C/C++/Rust):** Buffer overflow, out-of-bounds write, out-of-bounds read, use-after-free, integer overflow, format string, Rust unsafe code.
 
 Full list with CWE mappings and aliases: [references/bug-classes.md](references/bug-classes.md).

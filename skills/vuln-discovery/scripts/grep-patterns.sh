@@ -2,8 +2,8 @@
 # First-pass candidate search for dangerous patterns in a codebase.
 # Usage: ./scripts/grep-patterns.sh [directory] [language] [class]
 #   directory: path to scan (default: current dir)
-#   language:  optional filter - py, php, rb, js, ts, java, go, cs, kt, c, cpp, sh, yml (omit for all)
-#   class:     optional bug-class filter - injection, access, memory, cicd, secrets, crypto, ssrf, upload (omit for all)
+#   language:  optional filter - py, php, rb, js, ts, java, go, cs, kt, c, cpp, rs, sh, yml, dockerfile, helm, tf (omit for all)
+#   class:     optional bug-class filter - injection, access, memory, cicd, secrets, crypto, ssrf, upload, kubernetes, container, iac, aiml (omit for all)
 # Output is candidate lines; confirm each in context before reporting.
 
 ROOT="${1:-.}"
@@ -33,6 +33,10 @@ include_args() {
       cpp|c++)       echo "--glob '*.{cpp,cc,cxx,hpp,hxx,h}'" ;;
       sh|shell|bash) echo "--type sh" ;;
       yml|yaml|actions) echo "--glob '*.{yml,yaml}'" ;;
+      rs|rust)       echo "--type rust" ;;
+      dockerfile)    echo "--glob 'Dockerfile*'" ;;
+      helm)          echo "--glob '*.{tpl,yaml,yml}'" ;;
+      tf|terraform|hcl) echo "--glob '*.{tf,tfvars}'" ;;
       *)             echo "" ;;
     esac
   else
@@ -50,7 +54,11 @@ include_args() {
       cpp|c++)       echo "--include=*.cpp --include=*.cc --include=*.hpp --include=*.h" ;;
       sh|shell|bash) echo "--include=*.sh --include=*.bash" ;;
       yml|yaml|actions) echo "--include=*.yml --include=*.yaml" ;;
-      *)             echo "--include=*.py --include=*.php --include=*.rb --include=*.js --include=*.mjs --include=*.ts --include=*.tsx --include=*.java --include=*.go --include=*.cs --include=*.kt --include=*.c --include=*.cpp --include=*.h --include=*.sh --include=*.yml --include=*.yaml" ;;
+      rs|rust)       echo "--include=*.rs" ;;
+      dockerfile)    echo "--include=Dockerfile*" ;;
+      helm)          echo "--include=*.tpl --include=*.yaml --include=*.yml" ;;
+      tf|terraform|hcl) echo "--include=*.tf --include=*.tfvars" ;;
+      *)             echo "--include=*.py --include=*.php --include=*.rb --include=*.js --include=*.mjs --include=*.ts --include=*.tsx --include=*.java --include=*.go --include=*.cs --include=*.kt --include=*.c --include=*.cpp --include=*.h --include=*.sh --include=*.yml --include=*.yaml --include=*.rs --include=*.tf --include=Dockerfile*" ;;
     esac
   fi
 }
@@ -230,6 +238,93 @@ if should_run "injection"; then
   echo "--- Resource exhaustion indicators ---"
   run 'findAll\s*\(|\.all\s*$|objects\.all|find\s*\(\s*\{\s*\}'
   run 'MAX_CONTENT_LENGTH|max-file-size|fileSize|MAX_UPLOAD'
+fi
+
+# --- Kubernetes and cloud-native ---
+if should_run "kubernetes"; then
+  echo "--- RBAC misconfiguration ---"
+  run 'ClusterRole|ClusterRoleBinding'
+  run 'verbs:.*\*|resources:.*\*'
+  run 'verbs:.*bind|verbs:.*escalate|verbs:.*impersonate'
+  run 'resources:.*secrets.*verbs:.*(get|list|watch)'
+
+  echo "--- Pod security ---"
+  run 'privileged:\s*true'
+  run 'hostPID:\s*true|hostNetwork:\s*true|hostIPC:\s*true'
+  run 'runAsUser:\s*0'
+  run 'securityContext:\s*\{\}'
+  run 'capabilities:'
+
+  echo "--- Network exposure ---"
+  run 'type:\s*LoadBalancer|type:\s*NodePort'
+  run 'ListenAndServe|net\.Listen.*0\.0\.0\.0'
+  run 'NetworkPolicy'
+
+  echo "--- Unsafe volume mounts ---"
+  run 'hostPath:'
+  run 'docker\.sock|/var/run/docker'
+  run '/etc/kubernetes|/etc/pki|/root/\.ssh'
+
+  echo "--- Cross-namespace ---"
+  run 'InNamespace\s*\(\s*""\s*\)'
+  run '169\.254\.169\.254|metadata\.google\.internal'
+fi
+
+# --- Container / Dockerfile ---
+if should_run "container"; then
+  echo "--- Dockerfile security ---"
+  run 'FROM.*:latest|FROM\s+[a-z]+\s*$'
+  run 'USER\s+root|USER\s+0'
+  run 'ADD\s+https?://'
+  run 'ENV.*(PASSWORD|SECRET|KEY|TOKEN|CREDENTIAL)'
+  run 'ARG.*(PASSWORD|SECRET|KEY|TOKEN)'
+  run 'EXPOSE.*(5005|9229|4200|8000|3000|2345)'
+
+  echo "--- Helm chart security ---"
+  run 'securityContext:\s*\{\}|podSecurityContext:\s*\{\}'
+  run 'password:|secret:|token:|auth:'
+  run 'tpl\s+\.Values'
+  run 'resources:\s*\{\}'
+  run 'networkPolicy:.*enabled:\s*false'
+fi
+
+# --- IaC / Terraform ---
+if should_run "iac"; then
+  echo "--- Terraform IAM / access ---"
+  run 'Action.*=.*\*.*Resource.*=.*\*|Effect.*Allow.*Action.*\*'
+  run 'cidr_blocks.*0\.0\.0\.0/0'
+  run 'allUsers|allAuthenticatedUsers'
+
+  echo "--- Terraform encryption / logging ---"
+  run 'storage_encrypted\s*=\s*false|encrypted\s*=\s*false'
+  run 'block_public_acls\s*=\s*false|block_public_policy\s*=\s*false'
+  run 'enable_logging\s*=\s*false'
+  run 'protocol\s*=\s*"HTTP"'
+fi
+
+# --- AI/ML ---
+if should_run "aiml"; then
+  echo "--- ML model integrity ---"
+  run 'torch\.load|joblib\.load|pickle\.load|pickle\.loads'
+  run 'dill\.load|cloudpickle\.load|shelve\.open'
+  run 'ModelSerializer\.restore|PMMLModel'
+  run 'weights_only|safetensors'
+
+  echo "--- Prompt injection ---"
+  run 'completions\.create|ChatCompletion|chat\.completions'
+  run 'langchain|LLMChain|RetrievalQA|ConversationalRetrievalChain'
+  run 'get_relevant_documents|similarity_search|vectorstore'
+  run 'openai\.chat|anthropic\.messages|client\.chat'
+fi
+
+# --- Rust unsafe ---
+if should_run "memory"; then
+  echo "--- Rust unsafe patterns ---"
+  run 'unsafe\s*\{|unsafe\s+fn|unsafe\s+impl'
+  run 'transmute|ManuallyDrop|forget\s*\('
+  run '\*mut\s|\*const\s|\.as_ptr\(\)|\.as_mut_ptr\(\)'
+  run 'get_unchecked|\.offset\(|\.add\('
+  run 'extern\s+"C"|#\[no_mangle\]'
 fi
 
 echo ""

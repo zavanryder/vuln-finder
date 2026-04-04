@@ -1,6 +1,6 @@
-# Memory Safety Patterns (C/C++)
+# Memory Safety Patterns (C/C++/Rust)
 
-Patterns for buffer overflow, out-of-bounds read/write, use-after-free, integer overflow, and format string vulnerabilities in C and C++ code.
+Patterns for buffer overflow, out-of-bounds read/write, use-after-free, integer overflow, and format string vulnerabilities in C and C++ code, plus unsafe Rust patterns.
 
 ---
 
@@ -12,7 +12,8 @@ Patterns for buffer overflow, out-of-bounds read/write, use-after-free, integer 
 4. [Use-after-free](#use-after-free)
 5. [Integer overflow / wraparound](#integer-overflow--wraparound)
 6. [Format string](#format-string)
-7. [General search strategy](#general-search-strategy)
+7. [Rust unsafe patterns](#rust-unsafe-patterns)
+8. [General search strategy](#general-search-strategy)
 
 ---
 
@@ -108,6 +109,84 @@ Patterns for buffer overflow, out-of-bounds read/write, use-after-free, integer 
 
 ---
 
+## Rust unsafe patterns
+
+Rust's ownership system prevents most memory safety bugs at compile time, but `unsafe` blocks opt out of these guarantees. Vulnerabilities concentrate in `unsafe` code, FFI boundaries, and incorrect use of raw pointers.
+
+### Dangerous patterns
+
+**Raw pointer dereference:**
+```rust
+// VULNERABLE: dereferencing raw pointer without bounds validation
+unsafe {
+    let val = *ptr;             // raw pointer deref
+    let slice = &*raw_slice;    // raw slice deref
+    ptr.write(value);           // write through raw pointer
+    ptr.offset(n);              // pointer arithmetic
+}
+```
+
+**Transmute and type punning:**
+```rust
+// VULNERABLE: reinterprets memory layout -- UB if types incompatible
+let val: T = unsafe { std::mem::transmute(bytes) };
+
+// VULNERABLE: transmuting references can violate aliasing rules
+let mutable: &mut T = unsafe { std::mem::transmute(shared_ref) };
+```
+
+**FFI boundaries:**
+```rust
+// VULNERABLE: C function returns pointer with unknown lifetime/validity
+extern "C" { fn get_data() -> *mut u8; }
+let data = unsafe { &*get_data() };  // may be null, dangling, or unaligned
+
+// VULNERABLE: passing Rust data to C without ensuring it lives long enough
+let s = CString::new(input).unwrap();
+unsafe { c_function(s.as_ptr()); }
+// s could be dropped here while C code still holds the pointer
+```
+
+**ManuallyDrop and forget misuse:**
+```rust
+// VULNERABLE: ManuallyDrop leaks resources or creates use-after-free
+let mut data = ManuallyDrop::new(vec![1, 2, 3]);
+unsafe { ManuallyDrop::drop(&mut data); }
+// data is now dangling -- any subsequent access is UB
+```
+
+**Unchecked indexing:**
+```rust
+// VULNERABLE: bypasses bounds checking
+let val = unsafe { slice.get_unchecked(index) };
+let val = unsafe { *slice.as_ptr().add(index) };
+```
+
+**Unsafe trait implementations:**
+```rust
+// VULNERABLE: incorrectly implementing Send/Sync for non-thread-safe types
+unsafe impl Send for MyType {}
+unsafe impl Sync for MyType {}
+```
+
+### What to check
+- Every `unsafe` block: is the safety invariant documented and upheld?
+- FFI boundaries (`extern "C"`): lifetime management, null checks, alignment.
+- `transmute`: are source and target types compatible in layout?
+- Raw pointers: provenance, alignment, and validity at point of dereference.
+- `Send`/`Sync` impls: does the type actually satisfy thread-safety requirements?
+
+### Search signals
+```
+unsafe\s*\{|unsafe\s+fn|unsafe\s+impl
+\*mut\s|\*const\s|\.as_ptr\(\)|\.as_mut_ptr\(\)
+transmute|ManuallyDrop|forget\(
+get_unchecked|\.offset\(|\.add\(
+extern\s+"C"|#\[no_mangle\]
+```
+
+---
+
 ## General search strategy
 
 ### High-signal grep patterns for C/C++
@@ -120,9 +199,19 @@ printf\s*\(|fprintf\s*\(|snprintf\s*\(|syslog\s*\(
 (int|short|char)\s+.*\*\s*(size|len|count|offset|index)
 ```
 
+### High-signal grep patterns for Rust
+```
+unsafe\s*\{|unsafe\s+fn|unsafe\s+impl
+transmute|ManuallyDrop|forget\(
+\*mut\s|\*const\s|\.as_ptr|\.as_mut_ptr
+get_unchecked|\.offset\(|\.add\(
+extern\s+"C"|#\[no_mangle\]
+```
+
 ### Analysis approach
 1. **Find dangerous sinks** using the patterns above.
 2. **Trace the size/length/index value** back to its source. Is it user-controlled (network input, file content, command-line argument)?
 3. **Check for bounds validation** between source and sink. Is the value checked against the buffer size? Is the check correct (off-by-one, signed comparison)?
 4. **Check for safe alternatives** being used elsewhere in the codebase. Inconsistent use of safe vs unsafe functions is a signal.
-5. **Check compiler and runtime mitigations**: ASLR, stack canaries (`-fstack-protector`), FORTIFY_SOURCE, AddressSanitizer. These are mitigations, not fixes -- report the vulnerability and note mitigations if present.
+5. **For Rust**: focus on `unsafe` blocks. Check that safety invariants are documented and upheld. Pay special attention to FFI boundaries and `transmute`.
+6. **Check compiler and runtime mitigations**: ASLR, stack canaries (`-fstack-protector`), FORTIFY_SOURCE, AddressSanitizer. These are mitigations, not fixes -- report the vulnerability and note mitigations if present.
