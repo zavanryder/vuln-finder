@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ZavanVulnFinder is a Claude Code agent skill for discovering code vulnerabilities by bug class in snippets or codebases. The skill supports 46 bug classes (including injection, access control, memory safety, CI/CD, supply chain, Kubernetes/cloud-native, container/IaC, and AI/ML categories) across 16 languages/file types (Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, GitHub Actions, Shell, Dockerfile, Helm charts, Terraform/HCL).
+ZavanVulnFinder is a Claude Code agent skill for discovering code vulnerabilities by bug class in snippets or codebases. The skill supports 46 bug classes (including injection, access control, memory safety, CI/CD, supply chain, Kubernetes/cloud-native, container/IaC, cloud IaC, and AI/ML categories) across 19 languages/file types (Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, GitHub Actions, Shell, Dockerfile, Helm charts, Terraform/HCL, Azure Bicep, ARM JSON, AWS CloudFormation).
 
 ## Commands
 
 - Run the Python entry point: `uv run main.py`
 - Run the first-pass candidate scanner: `bash skills/vuln-discovery/scripts/grep-patterns.sh [directory] [language] [class]`
-  - Language filter: `py`, `php`, `rb`, `js`, `ts`, `java`, `go`, `cs`, `kt`, `c`, `cpp`, `rs`, `sh`, `yml`, `dockerfile`, `helm`, `tf`
-  - Class filter: `injection`, `access`, `memory`, `cicd`, `secrets`, `crypto`, `ssrf`, `upload`, `kubernetes`, `container`, `iac`, `aiml`
+  - Language filter: `py`, `php`, `rb`, `js`, `ts`, `java`, `go`, `cs`, `kt`, `c`, `cpp`, `rs`, `sh`, `yml`, `dockerfile`, `helm`, `tf`, `bicep`, `arm`, `cloudformation`
+  - Class filter: `injection`, `access`, `memory`, `cicd`, `secrets`, `crypto`, `ssrf`, `upload`, `kubernetes`, `container`, `iac`, `cloud`, `aiml`
   - Uses `rg` (ripgrep) when available, falls back to `grep`
 
 ## Architecture
@@ -27,7 +27,8 @@ The skill lives entirely under `skills/vuln-discovery/` and follows a layered re
   - `patterns-ci-cd.md` -- GitHub Actions injection, permission abuse, artifact poisoning, unsafe triggers, shell script issues.
   - `patterns-resource-exhaustion.md` -- ReDoS, unbounded queries, upload size, GraphQL depth, rate limiting.
   - `patterns-kubernetes.md` -- K8s RBAC misconfiguration, pod security, network exposure, unsafe volume mounts, cross-namespace access.
-  - `patterns-container.md` -- Dockerfile security, Helm chart misconfiguration, image pinning, Terraform/HCL insecure defaults.
+  - `patterns-container.md` -- Dockerfile security, Helm chart misconfiguration, image pinning.
+  - `patterns-cloud-iac.md` -- Cloud IaC patterns: Azure ARM/Bicep, AWS CloudFormation, GCP Terraform, OCI Terraform, shell provisioning security.
   - `patterns-ai-ml.md` -- ML model integrity (torch.load, pickle, joblib), prompt injection, RAG pipeline security.
   - `exploit-chains.md` -- Common chain patterns and how to outline/document them in reports.
   - `poc-web.md` -- PoC guidance for HTTP/API endpoint vulnerabilities.

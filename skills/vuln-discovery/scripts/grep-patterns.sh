@@ -3,7 +3,7 @@
 # Usage: ./scripts/grep-patterns.sh [directory] [language] [class]
 #   directory: path to scan (default: current dir)
 #   language:  optional filter - py, php, rb, js, ts, java, go, cs, kt, c, cpp, rs, sh, yml, dockerfile, helm, tf (omit for all)
-#   class:     optional bug-class filter - injection, access, memory, cicd, secrets, crypto, ssrf, upload, kubernetes, container, iac, aiml (omit for all)
+#   class:     optional bug-class filter - injection, access, memory, cicd, secrets, crypto, ssrf, upload, kubernetes, container, iac, cloud, aiml (omit for all)
 # Output is candidate lines; confirm each in context before reporting.
 
 ROOT="${1:-.}"
@@ -37,6 +37,9 @@ include_args() {
       dockerfile)    echo "--glob 'Dockerfile*'" ;;
       helm)          echo "--glob '*.{tpl,yaml,yml}'" ;;
       tf|terraform|hcl) echo "--glob '*.{tf,tfvars}'" ;;
+      bicep)         echo "--glob '*.bicep'" ;;
+      arm)           echo "--glob '*.json'" ;;
+      cloudformation|cfn) echo "--glob '*.{yaml,yml,json,template}'" ;;
       *)             echo "" ;;
     esac
   else
@@ -58,7 +61,10 @@ include_args() {
       dockerfile)    echo "--include=Dockerfile*" ;;
       helm)          echo "--include=*.tpl --include=*.yaml --include=*.yml" ;;
       tf|terraform|hcl) echo "--include=*.tf --include=*.tfvars" ;;
-      *)             echo "--include=*.py --include=*.php --include=*.rb --include=*.js --include=*.mjs --include=*.ts --include=*.tsx --include=*.java --include=*.go --include=*.cs --include=*.kt --include=*.c --include=*.cpp --include=*.h --include=*.sh --include=*.yml --include=*.yaml --include=*.rs --include=*.tf --include=Dockerfile*" ;;
+      bicep)         echo "--include=*.bicep" ;;
+      arm)           echo "--include=*.json" ;;
+      cloudformation|cfn) echo "--include=*.yaml --include=*.yml --include=*.json --include=*.template" ;;
+      *)             echo "--include=*.py --include=*.php --include=*.rb --include=*.js --include=*.mjs --include=*.ts --include=*.tsx --include=*.java --include=*.go --include=*.cs --include=*.kt --include=*.c --include=*.cpp --include=*.h --include=*.sh --include=*.yml --include=*.yaml --include=*.rs --include=*.tf --include=Dockerfile* --include=*.bicep --include=*.template" ;;
     esac
   fi
 }
@@ -182,6 +188,12 @@ if should_run "secrets"; then
   run 'password\s*=\s*["\x27]|api_key\s*=\s*["\x27]|secret\s*=\s*["\x27]|token\s*=\s*["\x27]'
   run 'SECRET_KEY\s*=|SecretKeySpec|PRIVATE.KEY'
   run 'AWS_ACCESS_KEY|GITHUB_TOKEN|SLACK_TOKEN|DATABASE_URL.*password'
+
+  echo "--- Shell provisioning secrets ---"
+  run 'docker login.*-p\s'
+  run 'curl.*(--insecure|-k\s)|wget.*--no-check-certificate'
+  run 'chmod\s+777|dir_mode=0777|file_mode=0777'
+  run 'echo.*(password|secret|credential|key|token)='
 fi
 
 if should_run "crypto"; then
@@ -300,6 +312,42 @@ if should_run "iac"; then
   run 'block_public_acls\s*=\s*false|block_public_policy\s*=\s*false'
   run 'enable_logging\s*=\s*false'
   run 'protocol\s*=\s*"HTTP"'
+fi
+
+# --- Cloud IaC (Azure, AWS, GCP, OCI) ---
+if should_run "cloud"; then
+  echo "--- Azure ARM / Bicep ---"
+  run 'publicNetworkAccess.*Enabled|publicNetworkAccess.*true'
+  run 'adminUserEnabled.*true'
+  run 'defaultAction.*Allow'
+  run 'sourceAddressPrefix.*[\*]|sourceAddressPrefix.*Internet'
+  run 'supportsHttpsTrafficOnly.*false'
+  run 'commandToExecute.*(password|secret|Password|Secret)'
+  run 'scope.*subscription\(\)|scope.*managementGroup\(\)'
+  run 'trustPolicy.*disabled|enableSoftDelete.*false'
+  run 'startIpAddress.*0\.0\.0\.0'
+  run 'httpsOnly.*false|remoteDebuggingEnabled.*true'
+
+  echo "--- AWS CloudFormation ---"
+  run 'CidrIp.*0\.0\.0\.0/0|CidrIpv6.*::/0'
+  run 'Action.*\*.*Resource.*\*|Effect.*Allow.*Action.*\*'
+  run 'PubliclyAccessible.*true'
+  run 'StorageEncrypted.*false'
+  run 'IsLogging.*false|EnableLogFileValidation.*false'
+  run 'MasterUserPassword'
+  run 'Protocol.*HTTP[^S]'
+
+  echo "--- GCP Terraform ---"
+  run 'source_ranges.*0\.0\.0\.0/0'
+  run 'allUsers|allAuthenticatedUsers'
+  run 'roles/(owner|editor)'
+  run 'enable_legacy_abac.*true|require_ssl.*false'
+
+  echo "--- OCI Terraform ---"
+  run 'source.*0\.0\.0\.0/0'
+  run 'access_type.*ObjectRead'
+  run 'manage all-resources'
+  run 'prohibit_public_ip_on_vnic.*false'
 fi
 
 # --- AI/ML ---

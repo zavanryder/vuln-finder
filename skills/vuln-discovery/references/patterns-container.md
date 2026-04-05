@@ -1,6 +1,6 @@
 # Container and IaC Patterns
 
-Patterns for Dockerfile security, Helm chart misconfiguration, image tag pinning, and Terraform/HCL infrastructure-as-code vulnerabilities.
+Patterns for Dockerfile security, Helm chart misconfiguration, and image tag pinning.
 
 ---
 
@@ -8,7 +8,7 @@ Patterns for Dockerfile security, Helm chart misconfiguration, image tag pinning
 
 1. [Dockerfile security](#dockerfile-security)
 2. [Helm chart misconfiguration](#helm-chart-misconfiguration)
-3. [Terraform / HCL misconfiguration](#terraform--hcl-misconfiguration)
+3. [Cloud IaC patterns](#cloud-iac-patterns) *(moved to [patterns-cloud-iac.md](patterns-cloud-iac.md))*
 4. [General search strategy](#general-search-strategy)
 
 ---
@@ -115,84 +115,9 @@ resources: {}
 
 ---
 
-## Terraform / HCL misconfiguration
+## Cloud IaC patterns
 
-### Public access to storage
-```hcl
-# VULNERABLE: S3 bucket publicly accessible
-resource "aws_s3_bucket_public_access_block" "example" {
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
-}
-
-# VULNERABLE: GCS bucket public
-resource "google_storage_bucket_iam_member" "public" {
-  member = "allUsers"
-}
-```
-
-### Unencrypted storage and transport
-```hcl
-# VULNERABLE: no encryption on RDS
-resource "aws_db_instance" "db" {
-  storage_encrypted = false
-}
-
-# VULNERABLE: no encryption on S3
-resource "aws_s3_bucket" "data" {
-  # missing server_side_encryption_configuration
-}
-
-# VULNERABLE: ELB without HTTPS
-resource "aws_lb_listener" "http" {
-  port     = 80
-  protocol = "HTTP"
-}
-```
-
-### Overpermissive IAM
-```hcl
-# VULNERABLE: admin access
-resource "aws_iam_policy" "admin" {
-  policy = jsonencode({
-    Statement = [{
-      Effect   = "Allow"
-      Action   = "*"
-      Resource = "*"
-    }]
-  })
-}
-```
-
-### Security groups with 0.0.0.0/0
-```hcl
-# VULNERABLE: SSH from anywhere
-resource "aws_security_group_rule" "ssh" {
-  type        = "ingress"
-  from_port   = 22
-  to_port     = 22
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-}
-
-# VULNERABLE: database port from anywhere
-resource "aws_security_group_rule" "db" {
-  type        = "ingress"
-  from_port   = 5432
-  to_port     = 5432
-  cidr_blocks = ["0.0.0.0/0"]
-}
-```
-
-### Missing logging and monitoring
-```hcl
-# VULNERABLE: CloudTrail or flow logs disabled
-resource "aws_cloudtrail" "trail" {
-  enable_logging = false
-}
-```
+For Terraform/HCL, Azure ARM/Bicep, AWS CloudFormation, GCP, and OCI patterns, see [patterns-cloud-iac.md](patterns-cloud-iac.md).
 
 ---
 
@@ -216,18 +141,7 @@ networkPolicy:.*enabled:\s*false
 resources:\s*\{\}
 ```
 
-### High-signal grep patterns for Terraform/HCL
-```
-cidr_blocks.*0\.0\.0\.0/0|ingress.*0\.0\.0\.0
-Action.*=.*\*|Effect.*Allow.*Action.*\*
-storage_encrypted\s*=\s*false|encrypted\s*=\s*false
-allUsers|allAuthenticatedUsers
-enable_logging\s*=\s*false
-block_public_acls\s*=\s*false
-```
-
 ### Analysis approach
 1. **Dockerfiles**: Check `FROM` for pinning, `USER` for non-root, `ADD` for remote URLs, `ENV`/`ARG` for secrets, `EXPOSE` for debug ports.
 2. **Helm charts**: Check `values.yaml` defaults for permissive security settings, hardcoded credentials, tpl injection vectors.
-3. **Terraform**: Check IAM policies for wildcards, security groups for 0.0.0.0/0, storage for encryption, logging for disabled flags.
-4. **Cross-cutting**: Verify that secrets are managed externally (Vault, KMS, sealed-secrets) rather than hardcoded in any IaC files.
+3. **Cross-cutting**: Verify that secrets are managed externally (Vault, KMS, sealed-secrets) rather than hardcoded in any IaC files.

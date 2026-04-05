@@ -9,18 +9,16 @@
 
 ## Summary
 
-| Severity | Count |
-|----------|-------|
-| Critical | N |
-| High     | N |
-| Medium   | N |
-| Low / Info | N |
+| ID | Title | Bug Class | Severity | Confidence | CWE |
+|----|-------|-----------|----------|------------|-----|
+| F1 | [short title] | `[bug-class-id]` | Critical/High/Medium/Low/Info | Confirmed/High/Medium/Low | CWE-NNN |
+| F2 | ... | ... | ... | ... | ... |
 
 ---
 
 ## Findings
 
-### [FINDING_TITLE] -- `[bug-class-id]`
+### F1: [FINDING_TITLE] -- `[bug-class-id]`
 
 - **Severity:** Critical | High | Medium | Low | Info
 - **CWE:** [e.g. CWE-89]
@@ -53,7 +51,7 @@
 
 ---
 
-*Repeat the "Findings" block for each issue.*
+*Repeat the "Findings" block for each issue, incrementing the ID (F1, F2, F3, ...).*
 
 ---
 
@@ -68,8 +66,8 @@
 
 **Flow:**
 
-1. **Step 1** ([bug-class], Finding #N): [Action and outcome.]
-2. **Step 2** ([bug-class], Finding #M): [Action and outcome.]
+1. **Step 1** ([bug-class], FN): [Action and outcome.]
+2. **Step 2** ([bug-class], FM): [Action and outcome.]
 3. **Step 3** (optional): [Continue until final impact.]
 
 **Result:** [Final impact: RCE, full data exfiltration, privilege escalation, etc.]

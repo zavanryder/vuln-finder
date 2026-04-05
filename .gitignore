@@ -6,3 +6,13 @@ __pycache__/
 .claude/
 results/
 planning/
+weblogic-deploy-tooling/
+node-oracledb/
+oci-service-operator/
+coherence-operator/
+oracle-db-appdev-monitoring/
+weblogic-azure/
+weblogic-monitoring-exporter/
+weblogic-remote-console/
+.vscode/
+.cursorignore

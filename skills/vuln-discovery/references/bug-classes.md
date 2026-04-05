@@ -52,7 +52,7 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 
 | ID | Name | CWE | Brief description |
 |----|------|-----|-------------------|
-| `iac-misconfig` | Infrastructure-as-code misconfiguration | CWE-1188 | Terraform/HCL: public storage buckets, overpermissive IAM (Action: *), unencrypted storage/transport, security groups with 0.0.0.0/0, disabled logging. |
+| `iac-misconfig` | Infrastructure-as-code misconfiguration | CWE-1188 | Terraform/HCL, Azure ARM/Bicep, AWS CloudFormation, GCP, and OCI: public storage/registries, overpermissive IAM/RBAC, unencrypted storage/transport, open network rules (NSGs/security groups/firewalls with 0.0.0.0/0), disabled logging/auditing, admin interfaces exposed to internet. |
 
 ### AI/ML classes
 
@@ -112,6 +112,10 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 - "volume mount", "hostpath", "docker socket", "docker.sock" -> `unsafe-volume-mount`
 - "container security", "dockerfile", "helm misconfig", "image pinning" -> `container-misconfig`
 - "iac", "terraform", "hcl", "infrastructure as code", "public bucket", "security group" -> `iac-misconfig`
+- "arm", "bicep", "azure iac", "nsg", "azure storage" -> `iac-misconfig`
+- "cloudformation", "cfn", "aws iac", "security group" -> `iac-misconfig`
+- "gcp iac", "gcp firewall", "gcs public" -> `iac-misconfig`
+- "oci iac", "oci security list", "oci public bucket" -> `iac-misconfig`
 - "model integrity", "torch.load", "joblib", "ml model", "model poisoning", "safetensors" -> `ml-model-integrity`
 - "prompt injection", "rag injection", "llm injection", "context injection" -> `prompt-injection`
 - "buffer overflow", "bof", "stack overflow", "heap overflow" -> `buffer-overflow`

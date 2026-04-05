@@ -9,7 +9,7 @@ Finds security issues in code based on user-specified bug classes across support
 
 ## Supported languages
 
-Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, GitHub Actions (YAML workflows), Shell, Dockerfile, Helm charts, Terraform/HCL.
+Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, GitHub Actions (YAML workflows), Shell, Dockerfile, Helm charts, Terraform/HCL, Azure Bicep, ARM JSON, AWS CloudFormation (YAML/JSON).
 
 ## Inputs
 
@@ -36,6 +36,7 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
    - Resource exhaustion: [references/patterns-resource-exhaustion.md](references/patterns-resource-exhaustion.md)
    - Kubernetes and cloud-native: [references/patterns-kubernetes.md](references/patterns-kubernetes.md)
    - Container and IaC (Dockerfile, Helm, Terraform): [references/patterns-container.md](references/patterns-container.md)
+   - Cloud IaC (Azure ARM/Bicep, AWS CloudFormation, GCP, OCI): [references/patterns-cloud-iac.md](references/patterns-cloud-iac.md)
    - AI/ML pipeline security: [references/patterns-ai-ml.md](references/patterns-ai-ml.md)
 
 4. **Search and analyze**
@@ -81,6 +82,7 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
 | [references/patterns-resource-exhaustion.md](references/patterns-resource-exhaustion.md) | ReDoS, unbounded pagination, upload size, GraphQL depth, and other resource exhaustion patterns. |
 | [references/patterns-kubernetes.md](references/patterns-kubernetes.md) | Kubernetes RBAC misconfiguration, pod security, network exposure, unsafe volume mounts, cross-namespace access, cloud metadata SSRF. |
 | [references/patterns-container.md](references/patterns-container.md) | Dockerfile security, Helm chart misconfiguration, image pinning, Terraform/HCL insecure defaults. |
+| [references/patterns-cloud-iac.md](references/patterns-cloud-iac.md) | Cloud-provider-specific IaC patterns: Azure ARM/Bicep, AWS CloudFormation, GCP Terraform, OCI Terraform, shell provisioning security. |
 | [references/patterns-ai-ml.md](references/patterns-ai-ml.md) | ML model integrity (torch.load, pickle, joblib), prompt injection, RAG pipeline security. |
 | [references/exploit-chains.md](references/exploit-chains.md) | Common chain patterns and how to outline a potential exploit. |
 | [references/poc-web.md](references/poc-web.md) | PoC guidance for HTTP/API endpoint vulnerabilities. |
@@ -107,7 +109,7 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
 
 **Kubernetes and cloud-native:** RBAC misconfiguration, pod security, network exposure, unsafe volume mounts, container misconfiguration.
 
-**IaC:** Terraform/HCL misconfiguration (public buckets, overpermissive IAM, unencrypted storage, open security groups).
+**IaC:** Terraform/HCL, Azure ARM/Bicep, AWS CloudFormation, GCP, and OCI misconfiguration (public storage/registries, overpermissive IAM, unencrypted storage, open network rules, disabled logging).
 
 **AI/ML:** ML model integrity, prompt injection.
 

@@ -8,7 +8,7 @@ ZavanVulnFinder performs structured vulnerability discovery: it resolves bug cla
 
 ## Coverage
 
-**46 bug classes** organized by domain:
+**46 bug classes** organized by domain, with multi-cloud IaC support:
 
 | Domain | Bug classes |
 |--------|-------------|
@@ -18,14 +18,14 @@ ZavanVulnFinder performs structured vulnerability discovery: it resolves bug cla
 | **Data & secrets** | Hardcoded secrets, sensitive data exposure, JWT/session issues, weak crypto |
 | **Infrastructure** | Security misconfiguration, insecure file upload, resource exhaustion (incl. ReDoS), vulnerable components, software/data integrity, GraphQL overexposure |
 | **Kubernetes & cloud** | RBAC misconfiguration, pod security, network exposure, unsafe volume mounts, container misconfiguration |
-| **IaC** | Terraform/HCL misconfiguration (public buckets, overpermissive IAM, unencrypted storage, open security groups) |
+| **IaC** | Terraform/HCL, Azure ARM/Bicep, AWS CloudFormation, GCP, and OCI misconfiguration (public storage/registries, overpermissive IAM, unencrypted storage, open network rules, disabled logging) |
 | **AI/ML** | ML model integrity (pickle/torch.load/joblib), prompt injection (direct + RAG stored injection) |
 | **JS/TS** | Prototype pollution |
 | **Memory safety** | Buffer overflow, OOB read/write, use-after-free, integer overflow, format string, Rust unsafe code |
 
-**16 languages and file types:**
+**19 languages and file types:**
 
-Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, GitHub Actions (YAML), Shell, Dockerfile, Helm charts, Terraform/HCL.
+Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, GitHub Actions (YAML), Shell, Dockerfile, Helm charts, Terraform/HCL, Azure Bicep, ARM JSON, AWS CloudFormation (YAML/JSON).
 
 ## Usage
 
@@ -50,6 +50,12 @@ Look for SQL injection, deserialization, and hardcoded secrets in the Java API a
 ```
 ```
 Audit the Dockerfiles and Terraform modules in infra/ for security misconfigurations
+```
+```
+Scan our Azure Bicep modules in infra/ for IaC security misconfigurations
+```
+```
+Check the CloudFormation templates in deploy/ for open security groups and IAM wildcards
 ```
 ```
 Check this Rust crate's unsafe blocks for memory safety issues
@@ -79,7 +85,8 @@ skills/vuln-discovery/
     patterns-ci-cd.md                   # GitHub Actions injection, supply chain
     patterns-resource-exhaustion.md     # ReDoS, unbounded queries, upload size
     patterns-kubernetes.md              # RBAC, pod security, network exposure, volume mounts
-    patterns-container.md               # Dockerfile, Helm, Terraform/HCL patterns
+    patterns-container.md               # Dockerfile, Helm chart patterns
+    patterns-cloud-iac.md              # Azure ARM/Bicep, AWS CFN, GCP, OCI patterns
     patterns-ai-ml.md                   # Model integrity, prompt injection, RAG security
     exploit-chains.md                   # Common chain patterns
     poc-web.md                          # PoC guidance: HTTP/API targets
