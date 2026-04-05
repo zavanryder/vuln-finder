@@ -159,6 +159,16 @@ Patterns apply to both JS and TS. For TypeScript, also watch for `any` types tha
 - **insecure-file-upload**: `multer` without `fileFilter` or `limits`; uploaded file saved with `originalname`; no content validation.
 - **sensitive-data-exposure**: `stack` property in error responses; `NODE_ENV !== 'production'` debug paths; console.log of tokens/passwords.
 
+### Electron (desktop apps)
+
+When `package.json` lists `electron`, audit the main process and preload scripts as a separate trust boundary from renderer code:
+
+- **electron-rce**: `nodeIntegration: true` (renderer can `require('child_process')`); `contextIsolation: false` (prototype pollution leaks main-world to isolated-world); `sandbox: false` combined with either.
+- **electron-shell**: `shell.openExternal(userUrl)` with non-`https?:` schemes -- `file://`, `smb://`, and custom protocol handlers can execute local binaries.
+- **electron-ipc**: `ipcMain.handle` / `ipcMain.on` reachable from renderer without `event.senderFrame.url` validation -- any iframe (including ad/3rd-party content) can invoke privileged handlers.
+- **electron-preload**: `contextBridge.exposeInMainWorld` exposing `fs`, `child_process`, or unfiltered IPC pass-through; the preload script *is* the trust boundary, so audit what it forwards.
+- **electron-navigation**: `will-navigate` / `new-window` handlers without an allowlist; `<webview>` with `allowpopups` or no `preload` restriction.
+
 ---
 
 ## Kotlin

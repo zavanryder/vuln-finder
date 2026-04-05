@@ -25,7 +25,7 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
    If the user said "ALL", use the full list from [references/bug-classes.md](references/bug-classes.md). Otherwise map the user's terms to canonical IDs using the alias table in that file. Memory-safety classes only apply when C/C++ files are present.
 
 2. **Identify languages**
-   Infer from file extensions or user hint. Match to the appropriate pattern references.
+   Infer from file extensions or user hint. Match to the appropriate pattern references. If `package.json` lists `electron` as a dependency, also load the Electron-specific patterns from `patterns-web.md` -- Electron is a runtime, not a file extension, so it won't be detected from file types alone.
 
 3. **Load patterns**
    For each relevant language and chosen bug class, read the appropriate pattern reference:
@@ -43,6 +43,7 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
    - For a **snippet**: analyze the provided code against the patterns for the chosen bug classes and languages.
    - For a **codebase**: search for dangerous APIs, sinks, and patterns. Use [scripts/grep-patterns.sh](scripts/grep-patterns.sh) for a first pass if helpful; then confirm each finding in context (data flow, sanitization, configuration, framework guards).
    - **Trace source to sink**: for each candidate, identify the source (user input, external data), the sink (dangerous API/operation), and whether any sanitizer or guard intervenes. Only report when there is a plausible path from source to sink.
+   - **Check pinned dependencies**: if a lockfile is present (`package-lock.json`, `yarn.lock`, `go.sum`, `Cargo.lock`, `Gemfile.lock`, pinned `requirements.txt`, `composer.lock`), scan it for known-vulnerable versions. Transitive deps are reachable code -- a vulnerable `merge` library three levels deep is the same sink as one called directly.
 
 5. **Evaluate exploit chains**
    If two or more distinct vulnerabilities were found, consider whether they can be chained for greater impact (e.g. RCE, critical data exfiltration, privilege escalation). Use [references/exploit-chains.md](references/exploit-chains.md) for common chain patterns. If a viable chain exists, add an **Exploit chain** section to the report.
@@ -64,8 +65,10 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
 ## Rules
 
 - **No false positives by default.** Only report when there is a plausible path to exploitation. Note "possible" or "needs review" when uncertain, and set confidence accordingly.
+- **Verify dismissals by value, not by shape.** When ruling out a grep hit as benign (test fixture, attribute-name constant, sample data), base the dismissal on the literal right-hand-side value -- not the variable name or surrounding context. `passwordAttr = 'Password'` is a key; `Password = 'welcome1'` is a credential. The same scrutiny applied to findings should apply to non-findings.
 - **Include CWE and confidence.** Every finding gets a CWE ID and a confidence level (Confirmed, High, Medium, Low).
 - **Source-to-sink required for High/Critical.** For High and Critical findings, explicitly trace the data flow from source to sink and note whether a sanitizer/guard is present or absent.
+- **Calibrate severity by trust boundary crossed.** Before rating High or Critical, ask: what privilege does the attacker need to reach the source, and what do they gain at the sink? If the required access is equivalent to the gained access (admin to admin, local user to that user's own files), the finding is informational regardless of how dangerous the sink looks in isolation.
 - **One language per finding.** If the same bug appears in multiple files, group by bug class but list each location.
 - **PoC for Critical/High.** For Critical or High findings, or chains with Critical/High impact, always suggest a PoC payload and offer to build a functional PoC.
 - **Prefer references over long text.** Keep this file short; use the pattern reference files for definitions and patterns.
