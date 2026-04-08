@@ -1,6 +1,6 @@
 ---
 name: vuln-discovery
-description: Discovers code vulnerabilities by bug class (e.g. SQL injection, CSRF, prototype pollution, buffer overflow, broken access control, resource exhaustion, Kubernetes RBAC, container security, Terraform misconfig, prompt injection, ML model integrity) in snippets or codebases. Use when the user asks to find vulnerabilities, security issues, audit code, check for specific bug types, review access control, or scan for secrets/misconfigurations. Supports Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, GitHub Actions workflows, Shell scripts, Dockerfiles, Helm charts, and Terraform/HCL. Also use when the user mentions OWASP, CWE, CVE scanning, secure code review, Kubernetes security, cloud-native security, container security, IaC security, or AI/ML pipeline security.
+description: Discovers code vulnerabilities by bug class (e.g. SQL injection, CSRF, prototype pollution, buffer overflow, broken access control, resource exhaustion, Kubernetes RBAC, container security, Terraform misconfig, prompt injection, ML model integrity, Oracle Database security, K8s operator security, default credentials, race conditions) in snippets or codebases. Use when the user asks to find vulnerabilities, security issues, audit code, check for specific bug types, review access control, or scan for secrets/misconfigurations. Supports Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, GitHub Actions workflows, Shell scripts, Dockerfiles, Helm charts, Terraform/HCL, and PL/SQL. Also use when the user mentions OWASP, CWE, CVE scanning, secure code review, Kubernetes security, cloud-native security, container security, IaC security, AI/ML pipeline security, or Oracle Database security.
 ---
 
 # Vulnerability Discovery
@@ -25,7 +25,7 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
    If the user said "ALL", use the full list from [references/bug-classes.md](references/bug-classes.md). Otherwise map the user's terms to canonical IDs using the alias table in that file. Memory-safety classes only apply when C/C++ files are present.
 
 2. **Identify languages**
-   Infer from file extensions or user hint. Match to the appropriate pattern references. If `package.json` lists `electron` as a dependency, also load the Electron-specific patterns from `patterns-web.md` -- Electron is a runtime, not a file extension, so it won't be detected from file types alone.
+   Infer from file extensions or user hint. Match to the appropriate pattern references. If `package.json` lists `electron` as a dependency, also load the Electron-specific patterns from `patterns-web.md` -- Electron is a runtime, not a file extension, so it won't be detected from file types alone. If Oracle DB connection code is present (JDBC Oracle thin URLs, `oracledb` imports, `sqlplus` invocations, `.sql` files with PL/SQL), also load `patterns-oracle-db.md`. If the codebase contains Kubernetes operator code (controller-runtime imports, CRD definitions, webhook configurations), also load `patterns-k8s-operators.md`.
 
 3. **Load patterns**
    For each relevant language and chosen bug class, read the appropriate pattern reference:
@@ -38,6 +38,8 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
    - Container and IaC (Dockerfile, Helm, Terraform): [references/patterns-container.md](references/patterns-container.md)
    - Cloud IaC (Azure ARM/Bicep, AWS CloudFormation, GCP, OCI): [references/patterns-cloud-iac.md](references/patterns-cloud-iac.md)
    - AI/ML pipeline security: [references/patterns-ai-ml.md](references/patterns-ai-ml.md)
+   - Oracle Database security: [references/patterns-oracle-db.md](references/patterns-oracle-db.md)
+   - Kubernetes operator security: [references/patterns-k8s-operators.md](references/patterns-k8s-operators.md)
 
 4. **Search and analyze**
    - For a **snippet**: analyze the provided code against the patterns for the chosen bug classes and languages.
@@ -87,6 +89,8 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
 | [references/patterns-container.md](references/patterns-container.md) | Dockerfile security, Helm chart misconfiguration, image pinning, Terraform/HCL insecure defaults. |
 | [references/patterns-cloud-iac.md](references/patterns-cloud-iac.md) | Cloud-provider-specific IaC patterns: Azure ARM/Bicep, AWS CloudFormation, GCP Terraform, OCI Terraform, shell provisioning security. |
 | [references/patterns-ai-ml.md](references/patterns-ai-ml.md) | ML model integrity (torch.load, pickle, joblib), prompt injection, RAG pipeline security. |
+| [references/patterns-oracle-db.md](references/patterns-oracle-db.md) | Oracle Database: PL/SQL injection, connection security, ORDS, TDE/Wallet, default credentials, dangerous PL/SQL APIs (UTL_HTTP, DBMS_SCHEDULER). |
+| [references/patterns-k8s-operators.md](references/patterns-k8s-operators.md) | Kubernetes operator security: CRD field injection, confused deputy, RBAC escalation, webhook security, controller reconciliation. |
 | [references/exploit-chains.md](references/exploit-chains.md) | Common chain patterns and how to outline a potential exploit. |
 | [references/poc-web.md](references/poc-web.md) | PoC guidance for HTTP/API endpoint vulnerabilities. |
 | [references/poc-local-file.md](references/poc-local-file.md) | PoC guidance for file parsing, archive extraction, and local exploitation. |
@@ -113,6 +117,10 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
 **Kubernetes and cloud-native:** RBAC misconfiguration, pod security, network exposure, unsafe volume mounts, container misconfiguration.
 
 **IaC:** Terraform/HCL, Azure ARM/Bicep, AWS CloudFormation, GCP, and OCI misconfiguration (public storage/registries, overpermissive IAM, unencrypted storage, open network rules, disabled logging).
+
+**Oracle Database:** Oracle DB misconfiguration (SYSDBA abuse, TDE, SQL*Net, ORDS, database links), default/weak credentials.
+
+**Operator and trust-boundary:** Confused deputy / cross-tenant access, TOCTOU race conditions, privilege escalation via system config.
 
 **AI/ML:** ML model integrity, prompt injection.
 

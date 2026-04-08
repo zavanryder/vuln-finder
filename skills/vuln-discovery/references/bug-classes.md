@@ -54,6 +54,21 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 |----|------|-----|-------------------|
 | `iac-misconfig` | Infrastructure-as-code misconfiguration | CWE-1188 | Terraform/HCL, Azure ARM/Bicep, AWS CloudFormation, GCP, and OCI: public storage/registries, overpermissive IAM/RBAC, unencrypted storage/transport, open network rules (NSGs/security groups/firewalls with 0.0.0.0/0), disabled logging/auditing, admin interfaces exposed to internet. |
 
+### Oracle Database classes
+
+| ID | Name | CWE | Brief description |
+|----|------|-----|-------------------|
+| `oracle-db-misconfig` | Oracle Database misconfiguration | CWE-1188 | SYSDBA/SYSOPER abuse, weak TDE configuration, plaintext connection strings, SQL*Net misconfiguration (unencrypted listener, missing sqlnet.ora encryption), unsafe database links, ORDS privilege escalation. |
+| `default-credentials` | Default / weak credentials | CWE-1392 | Known default passwords (sys/change_on_install, scott/tiger, admin/welcome1, etc.), weak password patterns in setup scripts, default listener passwords. Applies to databases, middleware, and application configs. |
+
+### Operator and trust-boundary classes
+
+| ID | Name | CWE | Brief description |
+|----|------|-----|-------------------|
+| `confused-deputy` | Confused deputy / cross-tenant access | CWE-441 | Operator or service processes a user-supplied resource reference (namespace, secret ref, endpoint) using its own elevated privileges without verifying the requestor's authorization. Common in K8s operators and cloud SDK integrations. |
+| `toctou` | Time-of-check to time-of-use | CWE-367 | Race condition between checking a condition and using the result: file permission checks then opens, existence checks then creates, symlink/hardlink races. |
+| `privilege-escalation` | Privilege escalation via system config | CWE-269 | NOPASSWD sudo rules, excessive Linux capabilities, setuid binaries, overprivileged service accounts, and system configurations that grant unintended elevated access. |
+
 ### AI/ML classes
 
 | ID | Name | CWE | Brief description |
@@ -116,6 +131,11 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 - "cloudformation", "cfn", "aws iac", "security group" -> `iac-misconfig`
 - "gcp iac", "gcp firewall", "gcs public" -> `iac-misconfig`
 - "oci iac", "oci security list", "oci public bucket" -> `iac-misconfig`
+- "oracle db", "oracle database", "sysdba", "tde", "sqlnet", "ords", "database link", "listener.ora" -> `oracle-db-misconfig`
+- "default password", "default credentials", "weak password", "scott/tiger", "welcome1", "changeme" -> `default-credentials`
+- "confused deputy", "cross-tenant", "cross-namespace secret", "namespace escalation" -> `confused-deputy`
+- "toctou", "race condition", "time of check", "symlink race" -> `toctou`
+- "privilege escalation", "nopasswd", "setuid", "capabilities", "sudo" -> `privilege-escalation`
 - "model integrity", "torch.load", "joblib", "ml model", "model poisoning", "safetensors" -> `ml-model-integrity`
 - "prompt injection", "rag injection", "llm injection", "context injection" -> `prompt-injection`
 - "buffer overflow", "bof", "stack overflow", "heap overflow" -> `buffer-overflow`
@@ -183,15 +203,26 @@ When user specifies "ALL", check for these IDs in order. Domain-specific classes
 ### IaC (checked when Terraform/HCL or Dockerfile files are present)
 37. `iac-misconfig`
 
+### Oracle Database (checked when PL/SQL, SQL*Plus scripts, ORDS config, or Oracle DB connection code is present)
+38. `oracle-db-misconfig`
+
+### Default credentials (always checked)
+39. `default-credentials`
+
+### Operator and trust-boundary (checked when K8s operator code or multi-tenant service code is present)
+40. `confused-deputy`
+41. `toctou`
+42. `privilege-escalation`
+
 ### AI/ML (checked when ML framework imports or LLM API calls are present)
-38. `ml-model-integrity`
-39. `prompt-injection`
+43. `ml-model-integrity`
+44. `prompt-injection`
 
 ### Memory safety (C/C++/Rust only)
-40. `buffer-overflow`
-41. `out-of-bounds-write`
-42. `out-of-bounds-read`
-43. `use-after-free`
-44. `integer-overflow`
-45. `format-string`
-46. `rust-unsafe`
+45. `buffer-overflow`
+46. `out-of-bounds-write`
+47. `out-of-bounds-read`
+48. `use-after-free`
+49. `integer-overflow`
+50. `format-string`
+51. `rust-unsafe`
