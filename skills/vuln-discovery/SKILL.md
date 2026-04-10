@@ -57,6 +57,9 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
    For any finding rated **Critical** or **High**, or for any **exploit chain** whose result is Critical or High:
    - Suggest a proof-of-concept payload.
    - Offer to build a PoC script with the user.
+   - **Every PoC must begin with a `Run:` line** stating the language/runtime and the exact command to execute it (e.g. `Run: uv run poc_f1.py --base-url http://localhost:8080`, `Run: npx tsx poc_f2.ts`, `Run: gcc poc.c -o poc && ./poc crash.bin`).
+   - **Prefer Python executed via `uv run`.** Use another language only when it materially simplifies the exploit (e.g. the target's own runtime is needed to demonstrate the bug, or a memory-corruption PoC needs C).
+   - **For exploit chains, attempt a single end-to-end PoC** (Python/uv preferred) that performs every step in sequence. If an end-to-end script is not feasible, say so and explain the gap.
    - Follow the appropriate PoC guide:
      - HTTP/API targets: [references/poc-web.md](references/poc-web.md)
      - Local file / archive / parsing: [references/poc-local-file.md](references/poc-local-file.md)
@@ -72,7 +75,7 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
 - **Source-to-sink required for High/Critical.** For High and Critical findings, explicitly trace the data flow from source to sink and note whether a sanitizer/guard is present or absent.
 - **Calibrate severity by trust boundary crossed.** Before rating High or Critical, ask: what privilege does the attacker need to reach the source, and what do they gain at the sink? If the required access is equivalent to the gained access (admin to admin, local user to that user's own files), the finding is informational regardless of how dangerous the sink looks in isolation.
 - **One language per finding.** If the same bug appears in multiple files, group by bug class but list each location.
-- **PoC for Critical/High.** For Critical or High findings, or chains with Critical/High impact, always suggest a PoC payload and offer to build a functional PoC.
+- **PoC for Critical/High.** For Critical or High findings, or chains with Critical/High impact, always suggest a PoC payload and offer to build a functional PoC. Lead every PoC with a `Run:` line (language + exact command). Prefer Python via `uv run`; use another language only if it simplifies the exploit.
 - **Prefer references over long text.** Keep this file short; use the pattern reference files for definitions and patterns.
 
 ## Resources

@@ -85,3 +85,19 @@
 - *Memory corruption: [references/poc-memory.md](../references/poc-memory.md)*
 
 *Ask the user for target details, then build the script from [poc-script-template.py](poc-script-template.py).*
+
+*Each PoC entry uses this shape:*
+
+### PoC-F[n] -- [title]
+
+**Run:** `[exact command, e.g. uv run poc_f1.py --base-url http://localhost:8080]`
+**Language/runtime:** [Python 3 (uv) | Node/TypeScript (tsx) | C (gcc) | bash | ...]
+**Dependencies:** `[e.g. uv add requests]` or `none`
+
+```[lang]
+[PoC code]
+```
+
+**Expected result:** [what success looks like -- stdout fragment, status code, file created, callback received]
+
+*For exploit chains, prefer a single end-to-end script (Python/uv) covering all steps. If not feasible, state why and provide per-step PoCs each with its own `Run:` line.*

@@ -95,10 +95,10 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 - "nosql", "mongo injection" -> `nosql-injection`
 - "prototype pollution", "proto pollution" -> `prototype-pollution`
 - "command injection", "os command", "shell injection" -> `command-injection`
-- "code injection", "eval injection", "dynamic code" -> `code-injection`
+- "code injection", "eval injection", "dynamic code", "ci-cd injection", "ci-cd-injection", "workflow injection" -> `code-injection`
 - "xss", "cross-site scripting" -> `xss`
 - "csrf", "cross-site request forgery" -> `csrf`
-- "path traversal", "directory traversal", "lfi", "zip slip" -> `path-traversal`
+- "path traversal", "directory traversal", "lfi", "zip slip", "improper input validation", "improper-input-validation" -> `path-traversal`  *(Note: "improper input validation" is too generic; map to the specific class based on the sink -- path-traversal, command-injection, sql-injection, etc.)*
 - "ssrf", "server-side request forgery" -> `ssrf`
 - "idor", "bola", "direct object reference", "object-level" -> `object-level-authz`
 - "mass assignment", "parameter binding", "bopla", "object property" -> `object-property-authz`
@@ -115,17 +115,17 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 - "file upload", "upload" -> `insecure-file-upload`
 - "dos", "resource exhaustion", "redos", "rate limit" -> `resource-exhaustion`
 - "data exposure", "info leak", "sensitive data", "debug dump" -> `sensitive-data-exposure`
-- "misconfiguration", "debug mode", "cors", "security headers" -> `security-misconfiguration`
+- "misconfiguration", "debug mode", "cors", "security headers", "improper cert validation", "improper-cert-validation", "certificate validation" -> `security-misconfiguration`
 - "jwt", "session", "token bypass", "alg none" -> `jwt-session-issues`
 - "outdated", "vulnerable dependency", "cve", "supply chain" -> `vulnerable-components`
-- "integrity", "artifact poisoning", "unsafe trigger" -> `software-data-integrity`
+- "integrity", "software integrity", "software-integrity", "artifact poisoning", "unsafe trigger" -> `software-data-integrity`
 - "cors" -> `cors-misconfiguration`
 - "graphql" -> `graphql-overexposure`
 - "k8s rbac", "rbac misconfiguration", "clusterrole", "overpermissive rbac" -> `k8s-rbac-misconfig`
 - "pod security", "securitycontext", "privileged container", "host namespace" -> `k8s-pod-security`
 - "network exposure", "unauthenticated endpoint", "missing networkpolicy", "loadbalancer exposure" -> `k8s-network-exposure`
 - "volume mount", "hostpath", "docker socket", "docker.sock" -> `unsafe-volume-mount`
-- "container security", "dockerfile", "helm misconfig", "image pinning" -> `container-misconfig`
+- "container security", "container misconfiguration", "container-misconfiguration", "dockerfile", "helm misconfig", "image pinning" -> `container-misconfig`
 - "iac", "terraform", "hcl", "infrastructure as code", "public bucket", "security group" -> `iac-misconfig`
 - "arm", "bicep", "azure iac", "nsg", "azure storage" -> `iac-misconfig`
 - "cloudformation", "cfn", "aws iac", "security group" -> `iac-misconfig`
@@ -134,7 +134,7 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 - "oracle db", "oracle database", "sysdba", "tde", "sqlnet", "ords", "database link", "listener.ora" -> `oracle-db-misconfig`
 - "default password", "default credentials", "weak password", "scott/tiger", "welcome1", "changeme" -> `default-credentials`
 - "confused deputy", "cross-tenant", "cross-namespace secret", "namespace escalation" -> `confused-deputy`
-- "toctou", "race condition", "time of check", "symlink race" -> `toctou`
+- "toctou", "race condition", "race-condition", "time of check", "symlink race", "insecure temp file", "insecure-temp-file" -> `toctou`
 - "privilege escalation", "nopasswd", "setuid", "capabilities", "sudo" -> `privilege-escalation`
 - "model integrity", "torch.load", "joblib", "ml model", "model poisoning", "safetensors" -> `ml-model-integrity`
 - "prompt injection", "rag injection", "llm injection", "context injection" -> `prompt-injection`
