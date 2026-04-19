@@ -26,6 +26,7 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 | `xxe` | XML External Entity | CWE-611 | XML parser processes external entities or DTD that can read files or trigger SSRF. |
 | `ldap-injection` | LDAP injection | CWE-90 | User input used in LDAP filter or DN without escaping. |
 | `ssti` | Server-side template injection | CWE-1336 | User input in template engine (Jinja2, Twig, Freemarker, etc.) can lead to RCE or data exposure. |
+| `el-injection` | Expression Language injection | CWE-917 | User input evaluated as an expression-language expression: OGNL (Struts / `%{...}`), SpEL (Spring / `#{...}`), JSP / Jakarta EL (`${...}` server-side eval), ADF EL (`#{...}` binding expressions), JEXL / MVEL / Camel Simple. Includes S2-045/S2-057 Struts OGNL-in-header, Spring4Shell-family, and Spring Cloud Function `routing-expression` SpEL RCE. See [references/patterns-el-injection.md](patterns-el-injection.md). |
 | `open-redirect` | Open redirect | CWE-601 | Redirect URL or target is user-controlled and not validated against an allowlist. |
 | `weak-crypto` | Weak crypto / randomness | CWE-327 | Weak or predictable randomness (e.g. `Math.random()` for security), deprecated ciphers, or bad key handling. |
 | `insecure-file-upload` | Insecure file upload | CWE-434 | Uploads not validated (type, size, content); stored with executable extension or in web-accessible path. |
@@ -54,6 +55,21 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 |----|------|-----|-------------------|
 | `iac-misconfig` | Infrastructure-as-code misconfiguration | CWE-1188 | Terraform/HCL, Azure ARM/Bicep, AWS CloudFormation, GCP, and OCI: public storage/registries, overpermissive IAM/RBAC, unencrypted storage/transport, open network rules (NSGs/security groups/firewalls with 0.0.0.0/0), disabled logging/auditing, admin interfaces exposed to internet. |
 
+### Oracle Database classes
+
+| ID | Name | CWE | Brief description |
+|----|------|-----|-------------------|
+| `oracle-db-misconfig` | Oracle Database misconfiguration | CWE-1188 | SYSDBA/SYSOPER abuse, weak TDE configuration, plaintext connection strings, SQL*Net misconfiguration (unencrypted listener, missing sqlnet.ora encryption), unsafe database links, ORDS privilege escalation. |
+| `default-credentials` | Default / weak credentials | CWE-1392 | Known default passwords (sys/change_on_install, scott/tiger, admin/welcome1, etc.), weak password patterns in setup scripts, default listener passwords. Applies to databases, middleware, and application configs. |
+
+### Operator and trust-boundary classes
+
+| ID | Name | CWE | Brief description |
+|----|------|-----|-------------------|
+| `confused-deputy` | Confused deputy / cross-tenant access | CWE-441 | Operator or service processes a user-supplied resource reference (namespace, secret ref, endpoint) using its own elevated privileges without verifying the requestor's authorization. Common in K8s operators and cloud SDK integrations. |
+| `toctou` | Time-of-check to time-of-use | CWE-367 | Race condition between checking a condition and using the result: file permission checks then opens, existence checks then creates, symlink/hardlink races. |
+| `privilege-escalation` | Privilege escalation via system config | CWE-269 | NOPASSWD sudo rules, excessive Linux capabilities, setuid binaries, overprivileged service accounts, and system configurations that grant unintended elevated access. |
+
 ### AI/ML classes
 
 | ID | Name | CWE | Brief description |
@@ -80,10 +96,10 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 - "nosql", "mongo injection" -> `nosql-injection`
 - "prototype pollution", "proto pollution" -> `prototype-pollution`
 - "command injection", "os command", "shell injection" -> `command-injection`
-- "code injection", "eval injection", "dynamic code" -> `code-injection`
+- "code injection", "eval injection", "dynamic code", "ci-cd injection", "ci-cd-injection", "workflow injection" -> `code-injection`
 - "xss", "cross-site scripting" -> `xss`
 - "csrf", "cross-site request forgery" -> `csrf`
-- "path traversal", "directory traversal", "lfi", "zip slip" -> `path-traversal`
+- "path traversal", "directory traversal", "lfi", "zip slip", "improper input validation", "improper-input-validation" -> `path-traversal`  *(Note: "improper input validation" is too generic; map to the specific class based on the sink -- path-traversal, command-injection, sql-injection, etc.)*
 - "ssrf", "server-side request forgery" -> `ssrf`
 - "idor", "bola", "direct object reference", "object-level" -> `object-level-authz`
 - "mass assignment", "parameter binding", "bopla", "object property" -> `object-property-authz`
@@ -95,27 +111,33 @@ Canonical IDs and short descriptions for vulnerability discovery. Use these IDs 
 - "xxe", "xml external entity" -> `xxe`
 - "ldap injection" -> `ldap-injection`
 - "ssti", "template injection", "jinja", "twig" -> `ssti`
+- "el injection", "expression language", "ognl", "spel", "struts ognl", "spring expression", "jsp el", "adf el", "jexl", "mvel", "camel simple" -> `el-injection`
 - "open redirect", "redirect" -> `open-redirect`
 - "weak crypto", "random", "crypto" -> `weak-crypto`
 - "file upload", "upload" -> `insecure-file-upload`
 - "dos", "resource exhaustion", "redos", "rate limit" -> `resource-exhaustion`
 - "data exposure", "info leak", "sensitive data", "debug dump" -> `sensitive-data-exposure`
-- "misconfiguration", "debug mode", "cors", "security headers" -> `security-misconfiguration`
+- "misconfiguration", "debug mode", "cors", "security headers", "improper cert validation", "improper-cert-validation", "certificate validation" -> `security-misconfiguration`
 - "jwt", "session", "token bypass", "alg none" -> `jwt-session-issues`
 - "outdated", "vulnerable dependency", "cve", "supply chain" -> `vulnerable-components`
-- "integrity", "artifact poisoning", "unsafe trigger" -> `software-data-integrity`
+- "integrity", "software integrity", "software-integrity", "artifact poisoning", "unsafe trigger" -> `software-data-integrity`
 - "cors" -> `cors-misconfiguration`
 - "graphql" -> `graphql-overexposure`
 - "k8s rbac", "rbac misconfiguration", "clusterrole", "overpermissive rbac" -> `k8s-rbac-misconfig`
 - "pod security", "securitycontext", "privileged container", "host namespace" -> `k8s-pod-security`
 - "network exposure", "unauthenticated endpoint", "missing networkpolicy", "loadbalancer exposure" -> `k8s-network-exposure`
 - "volume mount", "hostpath", "docker socket", "docker.sock" -> `unsafe-volume-mount`
-- "container security", "dockerfile", "helm misconfig", "image pinning" -> `container-misconfig`
+- "container security", "container misconfiguration", "container-misconfiguration", "dockerfile", "helm misconfig", "image pinning" -> `container-misconfig`
 - "iac", "terraform", "hcl", "infrastructure as code", "public bucket", "security group" -> `iac-misconfig`
 - "arm", "bicep", "azure iac", "nsg", "azure storage" -> `iac-misconfig`
 - "cloudformation", "cfn", "aws iac", "security group" -> `iac-misconfig`
 - "gcp iac", "gcp firewall", "gcs public" -> `iac-misconfig`
 - "oci iac", "oci security list", "oci public bucket" -> `iac-misconfig`
+- "oracle db", "oracle database", "sysdba", "tde", "sqlnet", "ords", "database link", "listener.ora" -> `oracle-db-misconfig`
+- "default password", "default credentials", "weak password", "scott/tiger", "welcome1", "changeme" -> `default-credentials`
+- "confused deputy", "cross-tenant", "cross-namespace secret", "namespace escalation" -> `confused-deputy`
+- "toctou", "race condition", "race-condition", "time of check", "symlink race", "insecure temp file", "insecure-temp-file" -> `toctou`
+- "privilege escalation", "nopasswd", "setuid", "capabilities", "sudo" -> `privilege-escalation`
 - "model integrity", "torch.load", "joblib", "ml model", "model poisoning", "safetensors" -> `ml-model-integrity`
 - "prompt injection", "rag injection", "llm injection", "context injection" -> `prompt-injection`
 - "buffer overflow", "bof", "stack overflow", "heap overflow" -> `buffer-overflow`
@@ -137,61 +159,73 @@ When user specifies "ALL", check for these IDs in order. Domain-specific classes
 4. `code-injection`
 5. `deserialization`
 6. `ssti`
-7. `ldap-injection`
-8. `xxe`
+7. `el-injection`
+8. `ldap-injection`
+9. `xxe`
 
 ### Access control
-9. `missing-authentication`
-10. `missing-authorization`
-11. `incorrect-authorization`
-12. `object-level-authz`
-13. `object-property-authz`
-14. `function-level-authz`
-15. `csrf`
+10. `missing-authentication`
+11. `missing-authorization`
+12. `incorrect-authorization`
+13. `object-level-authz`
+14. `object-property-authz`
+15. `function-level-authz`
+16. `csrf`
 
 ### Client-side and request handling
-16. `xss`
-17. `open-redirect`
-18. `ssrf`
-19. `path-traversal`
-20. `cors-misconfiguration`
+17. `xss`
+18. `open-redirect`
+19. `ssrf`
+20. `path-traversal`
+21. `cors-misconfiguration`
 
 ### Data and secrets
-21. `hardcoded-secrets`
-22. `sensitive-data-exposure`
-23. `jwt-session-issues`
-24. `weak-crypto`
+22. `hardcoded-secrets`
+23. `sensitive-data-exposure`
+24. `jwt-session-issues`
+25. `weak-crypto`
 
 ### Infrastructure and supply chain
-25. `security-misconfiguration`
-26. `insecure-file-upload`
-27. `resource-exhaustion`
-28. `vulnerable-components`
-29. `software-data-integrity`
-30. `graphql-overexposure`
+26. `security-misconfiguration`
+27. `insecure-file-upload`
+28. `resource-exhaustion`
+29. `vulnerable-components`
+30. `software-data-integrity`
+31. `graphql-overexposure`
 
 ### Prototype pollution (JS/TS only)
-31. `prototype-pollution`
+32. `prototype-pollution`
 
 ### Kubernetes and cloud-native (checked when K8s manifests, Helm charts, or operator code is present)
-32. `k8s-rbac-misconfig`
-33. `k8s-pod-security`
-34. `k8s-network-exposure`
-35. `unsafe-volume-mount`
-36. `container-misconfig`
+33. `k8s-rbac-misconfig`
+34. `k8s-pod-security`
+35. `k8s-network-exposure`
+36. `unsafe-volume-mount`
+37. `container-misconfig`
 
 ### IaC (checked when Terraform/HCL or Dockerfile files are present)
-37. `iac-misconfig`
+38. `iac-misconfig`
+
+### Oracle Database (checked when PL/SQL, SQL*Plus scripts, ORDS config, or Oracle DB connection code is present)
+39. `oracle-db-misconfig`
+
+### Default credentials (always checked)
+40. `default-credentials`
+
+### Operator and trust-boundary (checked when K8s operator code or multi-tenant service code is present)
+41. `confused-deputy`
+42. `toctou`
+43. `privilege-escalation`
 
 ### AI/ML (checked when ML framework imports or LLM API calls are present)
-38. `ml-model-integrity`
-39. `prompt-injection`
+44. `ml-model-integrity`
+45. `prompt-injection`
 
 ### Memory safety (C/C++/Rust only)
-40. `buffer-overflow`
-41. `out-of-bounds-write`
-42. `out-of-bounds-read`
-43. `use-after-free`
-44. `integer-overflow`
-45. `format-string`
-46. `rust-unsafe`
+46. `buffer-overflow`
+47. `out-of-bounds-write`
+48. `out-of-bounds-read`
+49. `use-after-free`
+50. `integer-overflow`
+51. `format-string`
+52. `rust-unsafe`

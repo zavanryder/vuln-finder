@@ -460,6 +460,55 @@ resource "oci_core_subnet" "private" {
 
 When `prohibit_public_ip_on_vnic` is false, instances in the subnet can be assigned public IPs, defeating the purpose of a private subnet.
 
+### Security list -- protocol "all"
+```hcl
+# VULNERABLE: all protocols from anywhere
+ingress_security_rules {
+  protocol = "all"                        # every protocol, not just TCP
+  source   = "0.0.0.0/0"
+}
+```
+
+`protocol = "all"` opens UDP, ICMP, and every other IP protocol. Combined with `0.0.0.0/0`, this is equivalent to no firewall.
+
+### OCI IAM policy -- cross-tenancy and overpermissive
+```hcl
+# VULNERABLE: cross-tenancy access without scope restriction
+"define tenancy source-tenancy as ocid1.tenancy.oc1..xxx"
+"admit any-user of tenancy source-tenancy to manage all-resources in tenancy"
+
+# VULNERABLE: use vs manage distinction ignored
+"allow group DevOps to manage all-resources in compartment production"
+# Should scope to specific resources:
+# "allow group DevOps to use instances in compartment production"
+# "allow group DevOps to manage buckets in compartment production"
+```
+
+Check for: `manage all-resources`, `admit any-user`, `in tenancy` (vs `in compartment`), missing `where` conditions.
+
+### OCI instance metadata (IMDSv1)
+```hcl
+# VULNERABLE: no metadata service restriction
+resource "oci_core_instance" "app" {
+  # OCI IMDSv1 has no token requirement -- any SSRF reaches:
+  # http://169.254.169.254/opc/v1/identity/
+  # http://169.254.169.254/opc/v1/instance/metadata/
+  # http://169.254.169.254/opc/v2/identity/cert.pem
+}
+```
+
+Unlike AWS IMDSv2, OCI does not require a PUT token. Any SSRF to 169.254.169.254 retrieves instance identity certificates and metadata.
+
+### Terraform state credential exposure
+```
+# VULNERABLE: .tfstate contains plaintext secrets
+# random_password, random_string resources store value in state
+# oci_database_db_system stores admin_password in state
+# Always use remote state with encryption + access control
+```
+
+Terraform state files contain every resource attribute in plaintext. Check for `random_password`, `random_string`, and any resource with password/secret attributes. State should be remote (OCI Object Storage) with encryption and restricted IAM policy.
+
 ---
 
 ## Cross-cloud shell provisioning
@@ -581,10 +630,16 @@ cloud-platform.*scopes
 ### High-signal grep patterns for OCI Terraform
 ```
 source.*0\.0\.0\.0/0
+protocol.*all
 access_type.*ObjectRead
 manage all-resources
+admit any-user
+in tenancy
 prohibit_public_ip_on_vnic.*false
 vault_type.*DEFAULT
+169\.254\.169\.254
+random_password|random_string
+admin_password|db_admin_password
 ```
 
 ### High-signal grep patterns for shell provisioning
