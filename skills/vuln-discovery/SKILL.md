@@ -90,6 +90,25 @@ Java, Python, Go, C#, PHP, Ruby, JavaScript, TypeScript, C/C++, Kotlin, Rust, Gi
 - **Remediation PoC is opt-in.** When the caller requests it (e.g. `--remediation-poc` harness flag, or explicit user instruction), every finding at every severity must ship a remediation PoC -- fixed code plus a verification test (`Run (verify fix):` line) with a clear pass/fail signal. For Critical/High, the test re-runs the exploit payload and asserts it fails. For Medium/Low/Info, the test submits the equivalent unsafe-input case and asserts the fix rejects or neutralizes it. When not requested, the summary-remediation line is sufficient.
 - **Prefer references over long text.** Keep this file short; use the pattern reference files for definitions and patterns.
 
+## False-positive exclusion rules
+
+A finding that matches any rule is FALSE POSITIVE (drop it, or downgrade to Info with the rule cited). Cite the rule number in the finding's rationale or validation column. Rules:
+
+1. Volumetric DoS / missing rate-limiting (handled at infrastructure layer). ReDoS, algorithmic complexity, and unbounded recursion ARE still valid.
+2. Test-only code, dead code, example/fixture code, or a crash with no security impact.
+3. Behavior that is intended by design (compression middleware, a backward-compatible weak algorithm offered alongside a strong one).
+4. Memory-safety concerns in memory-safe languages outside `unsafe` / FFI blocks.
+5. SSRF where the attacker controls only the URL path, not the host or protocol.
+6. User input flowing into an AI/LLM prompt (prompt injection is not a code vulnerability in the target).
+7. Path traversal in object storage (S3/GCS) where `../` does not escape a trust boundary.
+8. Trusted operator inputs (env vars, CLI flags) used as the attack vector, UNLESS the environment makes them untrusted (multi-tenant, pipeline parameters from external actors, webhook payloads).
+9. Client-side code flagged for a server-side vulnerability class.
+10. Outdated dependency versions with no explicit reachable vulnerability (managed by a separate dependency-scan process). **When dismissing a bundled-but-unreachable library because the runtime supplies an alternative (container shared library, OS package, sidecar), you MUST name the runtime alternative's version and confirm it falls outside the CVE's affected-version range. Merely naming the alternative source is not sufficient; the runtime version must be identified and verified patched.**
+11. Weak randomness used for non-security purposes (jitter, shuffling, dev-only fallbacks).
+12. Low-impact nuisance issues (log spoofing, CSRF on logout, self-XSS).
+13. Unverified / hallucinated file path. Every `Location:` path MUST be the exact result of an actual Glob/Grep/Read against the target repo. Do not compose paths from product/brand knowledge or sibling-product naming. If the path cannot be confirmed by the harness's post-scan path validator, the finding is downgraded one severity level and the path corrected; if no real path backs the underlying pattern, the finding is removed.
+14. Hardcoded column / table names in dynamic SQL. When a SQL injection finding's allegedly tainted identifier is a string literal or `static final` (or equivalent compile-time-constant) in source code -- regardless of how many call hops it travels before reaching the SQL builder -- the value has zero injection surface and is functionally equivalent to a static query. Distinct from rule 8: rule 8 is runtime trust (env / CLI), this rule is compile-time trust. Trigger ONLY when the identifier is provably constant at every program point on its path to the sink. Do NOT trigger when the identifier originates from request data, config files, JDBC metadata, environment variables, or any user-controlled source at any point in its provenance.
+
 ## Resources
 
 | Resource | When to use |

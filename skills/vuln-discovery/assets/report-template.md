@@ -9,10 +9,14 @@
 
 ## Summary
 
-| ID | Title | Bug Class | Severity | Confidence | CWE |
-|----|-------|-----------|----------|------------|-----|
-| F1 | [short title] | `[bug-class-id]` | Critical/High/Medium/Low/Info | Confirmed/High/Medium/Low | CWE-NNN |
-| F2 | ... | ... | ... | ... | ... |
+Use exactly these columns in this order, no substitutions, no extra columns, no missing columns:
+
+| ID | Title | Bug Class | Severity | Confidence | CWE | CVSS |
+|----|-------|-----------|----------|------------|-----|------|
+| F1 | [short title] | `[bug-class-id]` | Critical/High/Medium/Low/Info | Confirmed/High/Medium/Low | CWE-NNN | X.Y |
+| F2 | ... | ... | ... | ... | ... | ... |
+
+The CVSS column carries the numeric base score only (e.g. `9.1`); the full vector belongs in the per-finding detail block.
 
 ---
 
@@ -23,7 +27,7 @@
 - **Severity:** Critical | High | Medium | Low | Info
 - **CWE:** [e.g. CWE-89]
 - **Confidence:** Confirmed | High | Medium | Low
-- **CVSS v3.1:** `CVSS:3.1/AV:?/AC:?/PR:?/UI:?/S:?/C:?/I:?/A:?` -- Base score X.Y (Critical/High/Medium/Low). Required for every finding. Score the bug as it exists in the code, not the worst-case if combined with other bugs.
+- **CVSS v3.1:** `CVSS:3.1/AV:?/AC:?/PR:?/UI:?/S:?/C:?/I:?/A:?` -- Base score X.Y (Critical/High/Medium/Low). Required for every finding. Score THIS occurrence's exploitability against THIS product. If the code path is unreachable from production runtime (build-time tooling, test fixtures, vendored-but-unused code, dev-only compose, ephemeral CI containers), use an exposure-aware vector (typically AV:L / PR:H / AC:H) -- not the upstream CVE's theoretical worst case. If your CVSS band (Critical >=9.0, High 7.0-8.9, Medium 4.0-6.9, Low 0.1-3.9) disagrees with the Severity field by more than one level, re-examine both and align them.
 - **Location:** [file path or "snippet" and line/region]
 - **Source:** [where attacker-controlled data enters, e.g. `req.body.username`, `$_GET['id']`, stdin]
 - **Sink:** [dangerous function/API, e.g. `db.query(sql)`, `eval(input)`, `pickle.loads(data)`]
@@ -36,7 +40,7 @@
 ```
 
 **Description:**
-[One or two sentences: how user/source data reaches the sink and why it is unsafe.]
+[Plain English, for a developer who is not a security specialist: what the code does wrong, what an attacker could do because of it, and the simplest correct fix. One short paragraph. Avoid security jargon ("sink", "taint", "primitive", "trust boundary"). Keep file:line evidence in the Location / Code fields, not here.]
 
 **Why exploitable:**
 [What makes this a real risk, not just a theoretical pattern match. E.g. "User input from the login form reaches the SQL query without parameterization. No WAF or input validation intervenes."]

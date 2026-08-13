@@ -83,6 +83,7 @@ Classic IDOR / BOLA. User can access other users' objects by changing an ID.
 1. Find endpoints that accept an object ID (path param, query param, body field).
 2. Check whether the query filters by the authenticated user's identity or ownership.
 3. Look for direct database lookups: `Model.findById(id)` vs `Model.findOne({_id: id, userId: req.user.id})`.
+4. Treat any horizontal-partition column as tenant-equivalent: `supplier_id`, `customer_id`, `vendor_id`, `org_id`, `account_id`, `company_id`, `bu_id`. A query that filters by caller-supplied `supplier_id` without binding it to the authenticated principal is BOLA even if the word "tenant" never appears.
 
 ### Framework patterns
 - **Express + Mongoose**: `Model.findById(req.params.id)` without `.where('user', req.user._id)`.

@@ -3,6 +3,12 @@
 Proof-of-Concept script for [FINDING_TITLE / CHAIN_NAME].
 Use only against targets you are authorized to test.
 Replace placeholders (BASE_URL, payload, auth) with values provided by the user.
+
+Run:
+    uv run poc_[finding].py --base-url http://localhost:8080
+
+Dependencies:
+    uv add requests
 """
 
 import argparse
@@ -11,7 +17,7 @@ import sys
 try:
     import requests
 except ImportError:
-    print("Install requests: pip install requests", file=sys.stderr)
+    print("Install requests: uv add requests", file=sys.stderr)
     sys.exit(1)
 
 # --- Config (fill from user) ---
