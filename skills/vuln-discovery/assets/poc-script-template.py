@@ -59,12 +59,12 @@ def send_poc():
     return resp
 
 def main():
+    global BASE_URL, PAYLOAD
     parser = argparse.ArgumentParser(description="PoC for [finding/chain]")
     parser.add_argument("--base-url", default=BASE_URL, help="Target base URL")
     parser.add_argument("--payload", default=PAYLOAD, help="Override payload (optional)")
     args = parser.parse_args()
 
-    global BASE_URL, PAYLOAD
     BASE_URL = args.base_url
     if args.payload:
         PAYLOAD = args.payload
